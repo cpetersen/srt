@@ -1,6 +1,6 @@
-# Srt
+# SRT
 
-TODO: Write a gem description
+SRT stands for SubRip text file format, which is a file for storing subtitles. This is a Ruby library for manipulating SRT files. 
 
 ## Installation
 
