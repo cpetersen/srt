@@ -1,5 +1,3 @@
+require "srt/file"
+require "srt/line"
 require "srt/version"
-
-module Srt
-  # Your code goes here...
-end

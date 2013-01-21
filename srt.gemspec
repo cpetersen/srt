@@ -4,7 +4,7 @@ require File.expand_path('../lib/srt/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Christopher Petersen"]
   gem.email         = ["christopher.petersen@gmail.com"]
-  gem.description   = %q{SRT stands for SubRip text file format. This is a Ruby library for parsing SRT files.}
+  gem.description   = %q{SRT stands for SubRip text file format, which is a file for storing subtitles. This is a Ruby library for manipulating SRT files.}
   gem.summary       = %q{Ruby gem for parsing subtitle files.}
   gem.homepage      = ""
 
