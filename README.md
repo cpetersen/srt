@@ -18,7 +18,14 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+You can parse an SRT file with the following code:
+
+```ruby
+  file = SRT::File.parse(File.new("MY_SRT_FILENAME.srt"))
+  file.lines.each do |line|
+    puts line.text.join(" ")
+  end
+```
 
 ## Contributing
 
