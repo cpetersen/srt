@@ -36,6 +36,17 @@ module SRT
       result
     end
 
+    def to_s
+      result = []
+      lines.each do |line|
+        result << line.sequence
+        result << line.time_str
+        result += line.text
+        result << ""
+      end
+      result.join("\n")
+    end
+
     attr_writer :lines
     def lines
       @lines ||= []

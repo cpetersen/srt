@@ -18,5 +18,11 @@ module SRT
     def empty?
       sequence.nil? && start_time.nil? && end_time.nil? && text.empty?
     end
+
+    def time_str
+      s = start_time ? start_time.strftime("%H:%M:%S,%L") : ""
+      e = end_time ? end_time.strftime("%H:%M:%S,%L") : ""
+      "#{s} --> #{e}"
+    end
   end
 end

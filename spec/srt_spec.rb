@@ -2,16 +2,21 @@ require 'srt'
 
 describe SRT do
   context "A single line" do
+    let(:line) { SRT::Line.new }
     it "should be empty" do
-      line = SRT::Line.new
       line.should be_empty
     end
 
     it "should not be empty" do
-      line = SRT::Line.new(:text => "This is a test")
+      line.text = "This is a test"
       line.should_not be_empty
     end
 
+    it "should have the correct time string" do
+      line.start_time = DateTime.strptime("00:00:02,110", "%H:%M:%S,%L")
+      line.end_time = DateTime.strptime("00:00:04,578", "%H:%M:%S,%L")
+      line.time_str.should == "00:00:02,110 --> 00:00:04,578"
+    end
   end
 
   context "A properly formatted SRT file" do
@@ -67,6 +72,32 @@ describe SRT do
       it "should have the proper end time" do
         line.end_time.strftime("%H:%M:%S,%L").should == "00:43:28,139"
       end
+    end
+  end
+  context "A short SRT file" do
+    let(:file) { 
+      file = SRT::File.parse(File.open("./spec/bsg-s01e01.srt"))
+      file.lines = file.lines[0..2]
+      file
+    }
+
+    it "should have the proper to_s" do
+      OUTPUT =<<END
+1
+00:00:02,110 --> 00:00:04,578
+<i>(male narrator) Previously
+on Battlestar Galactica.</i>
+
+2
+00:00:05,313 --> 00:00:06,871
+Now you're telling me
+you're a machine.
+
+3
+00:00:07,014 --> 00:00:08,003
+The robot.
+END
+      file.to_s.should == OUTPUT
     end
   end
 end
