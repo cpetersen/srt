@@ -16,5 +16,5 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "srt"
   gem.require_paths = ["lib"]
-  gem.version       = Srt::VERSION
+  gem.version       = SRT::VERSION
 end
