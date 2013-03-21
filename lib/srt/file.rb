@@ -36,18 +36,31 @@ module SRT
       result
     end
 
-    def to_s
-      result = []
+    def timeshift(seconds)
       lines.each do |line|
-        result << line.sequence
-        result << line.time_str
-        result += line.text
-        result << ""
+        line.start_time += seconds unless  line.start_time + seconds < 0
+        line.end_time += seconds unless  line.end_time + seconds < 0
       end
-      result.join("\n")
+    end
+
+    def linear_progressive_timeshift(reference_time_a, target_time_a, reference_time_b, target_time_b)
+      time_rescale_factor = (target_time_b - target_time_a) / (reference_time_b - reference_time_a)
+      time_rebase_shift = target_time_a - reference_time_a * time_rescale_factor
+
+      lines.each do |line|
+        line.start_time *= time_rescale_factor
+        line.start_time += time_rebase_shift
+        line.end_time *= time_rescale_factor
+        line.end_time += time_rebase_shift
+      end
+    end
+
+    def to_s
+      lines.map{ |l| [l.sequence, l.time_str, l.text, ""] }.flatten.join("\n")
     end
 
     attr_writer :lines
+
     def lines
       @lines ||= []
     end

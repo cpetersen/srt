@@ -3,30 +3,23 @@ require 'srt'
 describe SRT do
   context "A single line" do
     let(:line) { SRT::Line.new }
-    it "should be empty" do
+    it "should initially be empty" do
       line.should be_empty
     end
 
-    it "should not be empty" do
-      line.text = "This is a test"
+    it "should not be empty after inserting text" do
+      line.text = ["This is a test"]
       line.should_not be_empty
     end
 
-    it "should have the correct time string" do
+    it "should print a time string that corresponds to its internal time values" do
       line.start_time = 2.110
       line.end_time = 4.578
       line.time_str.should == "00:00:02,110 --> 00:00:04,578"
     end
-
-    # it "should have the correct time values after timeshifting" do
-    #   line.start_time = DateTime.strptime("00:00:02,110", "%H:%M:%S,%L")
-    #   line.end_time = DateTime.strptime("00:00:04,578", "%H:%M:%S,%L")
-    #   line.shift(2.5)
-    #   line.time_str.should == "00:00:02,110 --> 00:00:04,578"        
-    # end
   end
 
-  context "A properly formatted SRT file" do
+  context "This given, properly formatted BSG SRT file" do
     let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
 
     it "should parse" do
@@ -41,38 +34,31 @@ describe SRT do
       file.errors.should be_empty
     end
 
-    context "the first line" do
-      let(:line) { file.lines.first }
-
-      it "should have the proper text" do
-        line.text.should == ["<i>(male narrator) Previously", "on Battlestar Galactica.</i>"]
-      end
-
-      it "should have the proper sequence" do
-        line.sequence.should == 1
-      end
-
-      it "should have the proper time string" do
-        line.time_str.should == "00:00:02,110 --> 00:00:04,578"
-      end
+    it "should have the expected data on the first line" do
+      file.lines.first.sequence.should == 1
+      file.lines.first.time_str.should == "00:00:02,110 --> 00:00:04,578"
+      file.lines.first.text.should == ["<i>(male narrator) Previously", "on Battlestar Galactica.</i>"]
+    end
+      
+    it "should have the expected data on the last line" do
+      file.lines.last.sequence.should == 600
+      file.lines.last.time_str.should == "00:43:26,808 --> 00:43:28,139"
+      file.lines.last.text.should == ["Thank you."]
     end
 
-    context "the last line" do
-      let(:line) { file.lines.last }
-      
-      it "should have the proper text" do
-        line.text.should == ["Thank you."]
-      end
+    it "should have equally shifted time strings on every line after a timeshift" do
+      file.timeshift(2.5)
+      file.lines[23].time_str.should == "00:01:59,291 --> 00:02:00,815"
+      file.lines[42].time_str.should == "00:03:46,164 --> 00:03:47,631"
+    end
 
-      it "should have the proper sequence" do
-        line.sequence.should == 600
-      end
-
-      it "should have the proper time string" do
-        line.time_str.should == "00:43:26,808 --> 00:43:28,139"
-      end
+    it "should have inequally shifted time strings on every line after a linear progressive timeshift" do
+      file.linear_progressive_timeshift(116.791, 233.582, 223.664, 894.656)
+      file.lines[23].time_str.should == "00:03:53,582 --> 00:04:03,009"
+      file.lines[42].time_str.should == "00:14:54,656 --> 00:15:03,730"
     end
   end
+
   context "A short SRT file" do
     let(:file) { 
       file = SRT::File.parse(File.open("./spec/bsg-s01e01.srt"))
