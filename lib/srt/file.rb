@@ -17,10 +17,10 @@ module SRT
             elsif line.sequence.nil?
               line.sequence = str.to_i
             elsif line.start_time.nil?
-              matcher = str.match(/(.*) -+> (.*)/)
-              if matcher
-                line.start_time = DateTime.strptime(matcher[1].strip, "%H:%M:%S,%L")
-                line.end_time = DateTime.strptime(matcher[2].strip, "%H:%M:%S,%L")
+              mres = str.match(/(\d+):(\d+):(\d+),(\d+) -+> (\d+):(\d+):(\d+),(\d+)/)
+              if mres
+                line.start_time = "#{mres[1].to_i * 3600 + mres[2].to_i * 60 + mres[3].to_i}.#{mres[4]}".to_f
+                line.end_time = "#{mres[5].to_i * 3600 + mres[6].to_i * 60 + mres[7].to_i}.#{mres[8]}".to_f
               else
                 line.error = "#{line}, Invalid Time String, [#{str}]"
               end

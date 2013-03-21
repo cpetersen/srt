@@ -13,10 +13,17 @@ describe SRT do
     end
 
     it "should have the correct time string" do
-      line.start_time = DateTime.strptime("00:00:02,110", "%H:%M:%S,%L")
-      line.end_time = DateTime.strptime("00:00:04,578", "%H:%M:%S,%L")
+      line.start_time = 2.110
+      line.end_time = 4.578
       line.time_str.should == "00:00:02,110 --> 00:00:04,578"
     end
+
+    # it "should have the correct time values after timeshifting" do
+    #   line.start_time = DateTime.strptime("00:00:02,110", "%H:%M:%S,%L")
+    #   line.end_time = DateTime.strptime("00:00:04,578", "%H:%M:%S,%L")
+    #   line.shift(2.5)
+    #   line.time_str.should == "00:00:02,110 --> 00:00:04,578"        
+    # end
   end
 
   context "A properly formatted SRT file" do
@@ -45,12 +52,8 @@ describe SRT do
         line.sequence.should == 1
       end
 
-      it "should have the proper start time" do
-        line.start_time.strftime("%H:%M:%S,%L").should == "00:00:02,110"
-      end
-
-      it "should have the proper end time" do
-        line.end_time.strftime("%H:%M:%S,%L").should == "00:00:04,578"
+      it "should have the proper time string" do
+        line.time_str.should == "00:00:02,110 --> 00:00:04,578"
       end
     end
 
@@ -65,12 +68,8 @@ describe SRT do
         line.sequence.should == 600
       end
 
-      it "should have the proper start time" do
-        line.start_time.strftime("%H:%M:%S,%L").should == "00:43:26,808"
-      end
-
-      it "should have the proper end time" do
-        line.end_time.strftime("%H:%M:%S,%L").should == "00:43:28,139"
+      it "should have the proper time string" do
+        line.time_str.should == "00:43:26,808 --> 00:43:28,139"
       end
     end
   end
