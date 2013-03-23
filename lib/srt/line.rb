@@ -5,6 +5,7 @@ module SRT
     attr_accessor :end_time
     attr_accessor :error
     attr_writer :text
+
     def text
       @text ||= []
     end
@@ -20,9 +21,7 @@ module SRT
     end
 
     def time_str
-      s = start_time ? start_time.strftime("%H:%M:%S,%L") : ""
-      e = end_time ? end_time.strftime("%H:%M:%S,%L") : ""
-      "#{s} --> #{e}"
+      [@start_time, @end_time].map { |t| sprintf("%02d:%02d:%02d,%s", t / 3600, (t % 3600) / 60, t % 60, sprintf("%.3f", t)[-3, 3]) }.join(" --> ")
     end
   end
 end
