@@ -17,10 +17,10 @@ module SRT
             elsif line.sequence.nil?
               line.sequence = str.to_i
             elsif line.start_time.nil?
-              mres = str.match(/(\d+):(\d+):(\d+),(\d+) -+> (\d+):(\d+):(\d+),(\d+)/)
+              mres = str.match(/(?<h1>\d+):(?<m1>\d+):(?<s1>\d+),(?<mil1>\d+) -+> (?<h2>\d+):(?<m2>\d+):(?<s2>\d+),(?<mil2>\d+)/)
               if mres
-                line.start_time = "#{mres[1].to_i * 3600 + mres[2].to_i * 60 + mres[3].to_i}.#{mres[4]}".to_f
-                line.end_time = "#{mres[5].to_i * 3600 + mres[6].to_i * 60 + mres[7].to_i}.#{mres[8]}".to_f
+                line.start_time = "#{mres["h1"].to_i * 3600 + mres["m1"].to_i * 60 + mres["s1"].to_i}.#{mres["mil1"]}".to_f
+                line.end_time = "#{mres["h2"].to_i * 3600 + mres["m2"].to_i * 60 + mres["s2"].to_i}.#{mres["mil2"]}".to_f
               else
                 line.error = "#{line}, Invalid Time String, [#{str}]"
               end
@@ -38,8 +38,8 @@ module SRT
 
     def timeshift(seconds)
       lines.each do |line|
-        line.start_time += seconds unless  line.start_time + seconds < 0
-        line.end_time += seconds unless  line.end_time + seconds < 0
+        line.start_time += seconds unless line.start_time + seconds < 0
+        line.end_time += seconds unless line.end_time + seconds < 0
       end
     end
 
@@ -48,10 +48,8 @@ module SRT
       time_rebase_shift = target_time_a - reference_time_a * time_rescale_factor
 
       lines.each do |line|
-        line.start_time *= time_rescale_factor
-        line.start_time += time_rebase_shift
-        line.end_time *= time_rescale_factor
-        line.end_time += time_rebase_shift
+        line.start_time = line.start_time * time_rescale_factor + time_rebase_shift
+        line.end_time = line.end_time * time_rescale_factor + time_rebase_shift
       end
     end
 
