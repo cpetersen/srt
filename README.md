@@ -46,7 +46,7 @@ Other example options, e.g.: `:all => "+700mil"`, `:all => "1.34m"`, `:all => "0
   file.timeshift({ 1 => "00:02:12,000", 843 => "01:38:06,000" }) # Correct drifting-out-of-sync
 ```
 
-This example call would shift the **first subtitle** to `00:02:12`, the **last subtitle** (assuming here that `#843` is the last one in your file!) to `01:38:06` and all the ones before, after, and in between those two reference points seamlessly to their relatively earlier or later begin times.
+This example call would shift the **first subtitle** to `00:02:12`, the **last subtitle** (assuming here that `#843` is the last one in your file) to `01:38:06`, and all the ones before, after, and in between those two reference points seamlessly to their own resulting earlier or later begin times.
 
 To make this work pass two `original timecode/id => target timecode` pairs where each takes any of these 4 forms: 
 
@@ -59,7 +59,7 @@ Another full example: `{ "00:00:51,400" => "+13s", "01:12:44,320" => "+2.436m" }
 
 This method can be used to fix subtitles that are *at different times differently out of sync*,
 and comes in handy especially if you have no idea what framerate your video or the video for which your subtitles
-were created for is using - you just need find two matching reference points in your video and subtitles.
+were created for is using - you just need to find two matching reference points in your video and subtitles.
 
 **Framerate-based timeshift**
 
