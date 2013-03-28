@@ -47,13 +47,13 @@ describe SRT do
     end
 
     it "should have equally shifted time strings on every line after a timeshift" do
-      file.timeshift(2.5)
+      file.timeshift( :all => "+2.5s" )
       file.lines[23].time_str.should == "00:01:59,291 --> 00:02:00,815"
       file.lines[42].time_str.should == "00:03:46,164 --> 00:03:47,631"
     end
 
     it "should have inequally shifted time strings on every line after a linear progressive timeshift" do
-      file.linear_progressive_timeshift(116.791, 233.582, 223.664, 894.656)
+      file.timeshift( 24 => "00:03:53,582", 43 => "00:14:54,656")
       file.lines[23].time_str.should == "00:03:53,582 --> 00:04:03,009"
       file.lines[42].time_str.should == "00:14:54,656 --> 00:15:03,730"
     end
