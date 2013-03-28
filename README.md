@@ -11,7 +11,7 @@ Add this line to your application's Gemfile:
 And then execute:
 
     $ bundle
-
+    
 Or install it yourself as:
 
     $ gem install srt
@@ -27,41 +27,30 @@ You can parse an SRT file with the following code:
   end
 ```
 
-`timeshift` offers multiple ways to fix subtitle synchronization issues
+`timeshift` offers multiple ways to fix subtitle synchronization issues;  
 
-# timeshift(instructions)
-#
-# constantly shift all subtitles
-# e.g. { :all => "-3.4s" }
-#      { :all => "1.5m" }
-#      { :all => "+700mil" }
-#
-# framerate conversion
-# e.g. { "25fps" => "23.99999fps" }
-# note: this implements a naive approach of what framerate conversion does or should do;
-#       it probably won't statisfy what video professionals expect - but it's a start :)    
-#
-# linear progressive timeshift
-# e.g. { 12 => "+10s", 569 => "+2.34m" }
-#      { 23 => "00:02:12,400", 843 => "01:38:06,000" }
-#      { "00:01:10,000" => "55s", "01:33:07,200" => "2.3m" } 
-#      { "00:01:10,000" => "00:02:12,400", "01:33:07,200" => "01:38:06,000" }
-#      { 57 => "00:02:12,400", "01:33:07,200" => "+13s" }
+Pass it a hash of the form `:all => "[+/-][amount][h|m|s|mil]"` for a constant shift:
 
 ```ruby
-  file.timeshift({ :all => "-2.5s" }) # resynchronize subtitles so they show up 2.5 seconds earlier 
+  # Shift all subtitles so they show up ...
+  file.timeshift({ :all => "-2.5s" }) # 2.5 seconds earlier
+  file.timeshift({ :all => "1.5m" }) # 1.5 minutes later  
+  file.timeshift({ :all => "+700mil" }) # 700 milliseconds later    
 ```
-
-`linear_progressive_timeshift` allows progressive timeshifting, e.g. to account for time-drift  
-caused by subtitles that were created for a video version with a different framerate:
+Pass it a hash of the form `"[old]fps" => "[new]fps"` for a framerate based shift:
 
 ```ruby
-  file.linear_progressive_timeshift(60, 70, 2700, 2760) 
- ```
+  file.timeshift({ "25fps" => "23.976fps" }) # scale timecodes from 25fps to 23.976fps
+```
+Pass it a hash in any of the following forms for a linear progressive shift , e.g. to account for time-drift caused by subtitles that were created for a video version with a different framerate:
 
-This applies a timeshift of 10 seconds at minute #1 (60 => 70),  
-then progressively more towards a 60 second shift by minute #45 (2700 => 2760)
-
+```ruby
+  file.timeshift({ 12 => "+10s", 569 => "+2.34m" })
+  file.timeshift({ 23 => "00:02:12,400", 843 => "01:38:06,000" }) 
+  file.timeshift({ "00:01:10,000" => "55s", "01:33:07,200" => "2.3m" })
+  file.timeshift({ "00:01:10,000" => "00:02:12,400", "01:33:07,200" => "01:38:06,000" })
+  file.timeshift({ 57 => "00:02:12,400", "01:33:07,200" => "+13s" })
+```
 
 ## Contributing
 
