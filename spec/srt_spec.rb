@@ -46,14 +46,20 @@ describe SRT do
       file.lines.last.text.should == ["Thank you."]
     end
 
-    it "should have equally shifted time strings on every line after a timeshift" do
-      file.timeshift( :all => "+2.5s" )
+    it "should have constantly shifted time strings on all lines after timeshift { :all => \"+2.5s\" }" do
+      file.timeshift({ :all => "+2.5s" })
       file.lines[23].time_str.should == "00:01:59,291 --> 00:02:00,815"
       file.lines[42].time_str.should == "00:03:46,164 --> 00:03:47,631"
     end
 
-    it "should have inequally shifted time strings on every line after a linear progressive timeshift" do
-      file.timeshift( 24 => "00:03:53,582", 43 => "00:14:54,656")
+    it "should have progressively shifted time strings on all lines after timeshift { \"25fps\" => \"23.976fps\" }" do
+      file.timeshift({ "25fps" => "23.976fps" })
+      file.lines[23].time_str.should == "00:01:52,007 --> 00:01:53,469"
+      file.lines[42].time_str.should == "00:03:34,503 --> 00:03:35,910"
+    end    
+
+    it "should have progressively shifted time strings on all lines after timeshift { 24 => \"00:03:53,582\", 43 => \"00:14:54,656\" }" do
+      file.timeshift({ 24 => "00:03:53,582", 43 => "00:14:54,656" })
       file.lines[23].time_str.should == "00:03:53,582 --> 00:04:03,009"
       file.lines[42].time_str.should == "00:14:54,656 --> 00:15:03,730"
     end

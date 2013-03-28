@@ -5,16 +5,12 @@ module SRT
       line = SRT::Line.new
       file.each_with_index do |str, index|
         begin
-          if line.error
-            if str.strip.empty?
-              result.lines << line unless line.empty?
-              line = SRT::Line.new
-            end
-          else
-            if str.strip.empty?
-              result.lines << line unless line.empty?
-              line = SRT::Line.new
-            elsif line.sequence.nil?
+          if str.strip.empty?
+            result.lines << line unless line.empty?
+            line = SRT::Line.new
+          elsif !line.error
+
+            if line.sequence.nil?
               line.sequence = str.to_i
             elsif line.start_time.nil?
               if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+)/)
@@ -35,6 +31,7 @@ module SRT
             else
               line.text << str.strip
             end
+
           end
         rescue
           line.error = "#{index}, General Error, [#{str}]"
@@ -44,24 +41,6 @@ module SRT
       result
     end
 
-    # timeshift(instructions)
-    #
-    # constantly shift all subtitles
-    # e.g. { :all => "-3.4s" }
-    #      { :all => "1.5m" }
-    #      { :all => "+700mil" }
-    #
-    # framerate conversion
-    # e.g. { "25fps" => "23.99999fps" }
-    # note: this implements a naive approach of what framerate conversion does or should do;
-    #       it probably won't statisfy what video professionals expect - but it's a start :)    
-    #
-    # linear progressive timeshift
-    # e.g. { 12 => "+10s", 569 => "+2.34m" }
-    #      { 23 => "00:02:12,400", 843 => "01:38:06,000" }
-    #      { "00:01:10,000" => "55s", "01:33:07,200" => "2.3m" } 
-    #      { "00:01:10,000" => "00:02:12,400", "01:33:07,200" => "01:38:06,000" }
-    #      { 57 => "00:02:12,400", "01:33:07,200" => "+13s" }
     def timeshift(instructions)
       if instructions.length == 1
         if instructions[:all] && (seconds = SRT::File.parse_timespan(instructions[:all]))
@@ -110,7 +89,7 @@ module SRT
 
     def self.parse_framerate(framerate_string)
       mres = framerate_string.match(/(?<fps>\d+((\.)?\d+))(fps)/)
-      mres ? mres["fps"] : nil
+      mres ? mres["fps"].to_f : nil
     end
 
     def self.parse_timecode(timecode_string)
