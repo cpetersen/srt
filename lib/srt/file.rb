@@ -4,7 +4,8 @@ module SRT
       result = SRT::File.new
       line = SRT::Line.new
       file.each_with_index do |str, index|
-        begin
+          str.encode!("UTF-8", { :invalid => :replace, :universal_newline => true })
+        #begin
           if str.strip.empty?
             result.lines << line unless line.empty?
             line = SRT::Line.new
@@ -13,7 +14,7 @@ module SRT
             if line.sequence.nil?
               line.sequence = str.to_i
             elsif line.start_time.nil?
-              if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+)/)
+              if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+) ?(?<display_coordinates>X1:\d+ X2:\d+ Y1:\d+ Y2:\d+)?/)
                 
                 if (line.start_time = SRT::File.parse_timecode(mres["start_timecode"])) == nil
                   line.error = "#{line}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
@@ -24,6 +25,10 @@ module SRT
                   line.error = "#{line}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
                   puts line.error
                 end
+
+                if mres["display_coordinates"]
+                  line.display_coordinates = mres["display_coordinates"]
+                end
               else
                 line.error = "#{line}, Invalid Time Line formatting, [#{str}]"
                 puts line.error
@@ -33,10 +38,10 @@ module SRT
             end
 
           end
-        rescue
-          line.error = "#{index}, General Error, [#{str}]"
-          puts line.error
-        end
+        #rescue
+        #  line.error = "#{index}, General Error, [#{str}]"
+        #  puts line.error
+        #end
       end
       result
     end
@@ -72,7 +77,7 @@ module SRT
     end
 
     def to_s
-      lines.map{ |l| [l.sequence, l.time_str, l.text, ""] }.flatten.join("\n")
+      lines.map{ |l| [l.sequence, (l.display_coordinates ? l.time_str + l.display_coordinates : l.time_str), l.text, ""] }.flatten.join("\n")
     end
 
     attr_writer :lines

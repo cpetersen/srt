@@ -107,4 +107,27 @@ END
       file.errors.should be_empty
     end
   end  
+
+  context "This dummy SRT file containing display coordinates" do
+    let(:file) { SRT::File.parse(File.open("./spec/coordinates-dummy.srt")) }
+
+    it "should parse" do
+      file.class.should == SRT::File
+    end
+    it "should have 3 lines" do
+      file.lines.size.should == 3
+    end
+
+    it "should not have errors" do
+      file.errors.should be_empty
+    end    
+
+    it "should have the expected display coordinates on the first line" do
+      file.lines.first.display_coordinates.should == "X1:100 X2:600 Y1:1 Y2:4"
+    end
+
+    it "should have the expected display coordinates on the last line" do
+      file.lines.last.display_coordinates.should == "X1:1 X2:333 Y1:50 Y2:29"
+    end  
+  end
 end
