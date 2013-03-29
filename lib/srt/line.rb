@@ -1,5 +1,6 @@
 module SRT
   class Line
+    attr_accessor :display_coordinates
     attr_accessor :sequence
     attr_accessor :start_time
     attr_accessor :end_time

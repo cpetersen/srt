@@ -1,0 +1,13 @@
+1
+00:00:04,000 --> 00:00:08,000 X1:100 X2:600 Y1:1 Y2:4
+A: Coordinated action has nothing to do with display coordinates
+
+2
+00:00:16,000 --> 00:00:32,000
+B: Yeah sure, that's why I have none, plus what sense do pixel-based
+display coordinates make? Sheesh!
+
+3
+00:01:04,000 --> 00:02:08,000 X1:1 X2:333 Y1:50 Y2:29
+A: Still I'm implementing them; Whatevs.
+
