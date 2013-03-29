@@ -91,4 +91,20 @@ END
       file.to_s.should == OUTPUT
     end
   end
+
+  context "This given, technically dubious, spanish language WOTW SRT file" do
+    let(:file) { SRT::File.parse(File.open("./spec/wotw-dubious.srt")) }
+
+    it "should parse" do
+      file.class.should == SRT::File
+    end
+
+    it "should have 1123 lines" do
+      file.lines.size.should == 1123
+    end
+
+    it "should not have errors" do
+      file.errors.should be_empty
+    end
+  end  
 end
