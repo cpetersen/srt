@@ -128,6 +128,32 @@ describe SRT do
       end
     end
 
+    describe "#split" do
+      context "when calling it on a properly formatted BSG SRT file" do
+        let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+      
+        context "when passing { :at => \"00:19:24,500\" }" do 
+          let(:result) { file.split( :at => "00:19:24,500" ) }
+
+          it "should return an array containing two SRT::File instances" do
+            expect(result.length).to eq(2)
+            expect(result[0].class).to eq(SRT::File)
+            expect(result[1].class).to eq(SRT::File)
+          end
+
+          it "should include a subtitle in both new files if it overlaps the splitting point" do
+            expect(result[0].lines[236].text).to eq(["I'll see you guys in combat."])
+            expect(result[1].lines[0].text).to eq(["I'll see you guys in combat."])
+          end
+
+          it "should shift back all timecodes of the second file relative to the new file beginning" do
+            expect(result[0].lines[236].time_str).to eq("00:00:00,000 --> 00:00:01,528")
+            expect(result[0].lines[237].time_str).to eq("00:00:01,737 --> 00:00:03,466")
+          end
+        end
+      end
+    end
+
     describe "#timeshift" do
       context "when calling it on a properly formatted BSG SRT file" do
         let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
