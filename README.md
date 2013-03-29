@@ -11,7 +11,7 @@ Add this line to your application's Gemfile:
 And then execute:
 
     $ bundle
-
+    
 Or install it yourself as:
 
     $ gem install srt
@@ -27,41 +27,49 @@ You can parse an SRT file with the following code:
   end
 ```
 
-`timeshift` offers multiple ways to fix subtitle synchronization issues
+#### Timeshifting
 
-# timeshift(instructions)
-#
-# constantly shift all subtitles
-# e.g. { :all => "-3.4s" }
-#      { :all => "1.5m" }
-#      { :all => "+700mil" }
-#
-# framerate conversion
-# e.g. { "25fps" => "23.99999fps" }
-# note: this implements a naive approach of what framerate conversion does or should do;
-#       it probably won't statisfy what video professionals expect - but it's a start :)    
-#
-# linear progressive timeshift
-# e.g. { 12 => "+10s", 569 => "+2.34m" }
-#      { 23 => "00:02:12,400", 843 => "01:38:06,000" }
-#      { "00:01:10,000" => "55s", "01:33:07,200" => "2.3m" } 
-#      { "00:01:10,000" => "00:02:12,400", "01:33:07,200" => "01:38:06,000" }
-#      { 57 => "00:02:12,400", "01:33:07,200" => "+13s" }
+The method `timeshift` takes a hash and supports three different modes of timecode processing:
+
+**Constant timeshift** 
 
 ```ruby
-  file.timeshift({ :all => "-2.5s" }) # resynchronize subtitles so they show up 2.5 seconds earlier 
+  file.timeshift( :all => "-2.5s" ) # Shift all subtitles so they show up 2.5 seconds earlier    
 ```
 
-`linear_progressive_timeshift` allows progressive timeshifting, e.g. to account for time-drift  
-caused by subtitles that were created for a video version with a different framerate:
+Simply pass a hash of the form `:all => "[+|-][amount][h|m|s|mil]"`  
+Other example options, e.g.: `:all => "+700mil"`, `:all => "1.34m"`, `:all => "0.15h"`
+
+ **Progressive timeshift**
 
 ```ruby
-  file.linear_progressive_timeshift(60, 70, 2700, 2760) 
- ```
+  file.timeshift({ 1 => "00:02:12,000", 843 => "01:38:06,000" }) # Correct drifting-out-of-sync
+```
 
-This applies a timeshift of 10 seconds at minute #1 (60 => 70),  
-then progressively more towards a 60 second shift by minute #45 (2700 => 2760)
+This example call would shift the **first subtitle** to `00:02:12`, the **last subtitle** (assuming here that `#843` is the last one in your file) to `01:38:06`, and all the ones before, after, and in between those two reference points seamlessly to their own resulting earlier or later begin times.
 
+To make this work pass two `original timecode/id => target timecode` pairs where each takes any of these 4 forms: 
+
+* `[id] => "[hh]:[mm]:[ss],[mil]"`
+* `[id] => "[+/-][amount][h|m|s|mil]"`
+* `"[hh]:[mm]:[ss],[mil]" => "[hh]:[mm]:[ss],[mil]"`
+* `"[hh]:[mm]:[ss],[mil]" => "[+/-][amount][h|m|s|mil]"`
+
+Another full example: `{ "00:00:51,400" => "+13s", "01:12:44,320" => "+2.436m" }`
+
+This method can be used to fix subtitles that are *at different times differently out of sync*,
+and comes in handy especially if you have no idea what framerate your video or the video for which your subtitles
+were created for is using - you just need to find two matching reference points in your video and subtitles.
+
+**Framerate-based timeshift**
+
+```ruby
+  file.timeshift({ "25fps" => "23.976fps" }) # Scale timecodes from 25fps to 23.976fps
+```
+
+For a framerate-based timeshift pass a hash of the form `"[old]fps" => "[new]fps"`
+
+This is usually only useful if you have some background information about the designated framerates of your video and subtitles.
 
 ## Contributing
 
