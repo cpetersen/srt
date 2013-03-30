@@ -71,6 +71,17 @@ For a framerate-based timeshift pass a hash of the form `"[old]fps" => "[new]fps
 
 This is usually only useful if you have some background information about the designated framerates of your video and subtitles.
 
+#### Splitting
+
+```ruby
+  parts = file.split( :at => "01:09:24,000" ) # Split the file in two at 01:09:24
+```
+
+The method `split` splits your subtitles at one (or more) points and returns an array of two (or more) instances of `SRT::File`.
+The timecodes of the split parts are relatively shifted towards the beginning so they line up with your multi-part video. (You probably expected that.)
+
+Example options for a multi-split: `{ :at => ["00:19:24,500", "01:32:09,120", ...] }`
+
 ## Contributing
 
 1. Fork it
