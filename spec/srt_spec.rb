@@ -141,14 +141,24 @@ describe SRT do
             expect(result[1].class).to eq(SRT::File)
           end
 
-          it "should include a subtitle in both new files if it overlaps the splitting point" do
-            expect(result[0].lines[236].text).to eq(["I'll see you guys in combat."])
-            expect(result[1].lines[0].text).to eq(["I'll see you guys in combat."])
+          it "should include a subtitle that overlaps a splitting point in the first file" do
+            expect(result[0].lines.last.text).to eq(["I'll see you guys in combat."])
+          end
+
+          it "should make an overlapping subtitle end at the splitting point in the first file" do
+            expect(result[0].lines.last.time_str).to eq("00:19:23,901 --> 00:19:24,500")
+          end
+
+          it "should include a subtitle that overlaps a splitting point in the second file as well" do
+            expect(result[1].lines.first.text).to eq(["I'll see you guys in combat."])
+          end
+
+          it "should make an overlapping subtitle remain at the beginning in the second file" do
+            expect(result[1].lines.first.time_str).to eq("00:00:00,000 --> 00:00:01,528")
           end
 
           it "should shift back all timecodes of the second file relative to the new file beginning" do
-            expect(result[0].lines[236].time_str).to eq("00:00:00,000 --> 00:00:01,528")
-            expect(result[0].lines[237].time_str).to eq("00:00:01,737 --> 00:00:03,466")
+            expect(result[1].lines[1].time_str).to eq("00:00:01,737 --> 00:00:03,466")
           end
         end
       end

@@ -4,8 +4,7 @@ module SRT
       result = SRT::File.new
       line = SRT::Line.new
       file.each_with_index do |str, index|
-          str.encode!("UTF-8", { :invalid => :replace, :universal_newline => true })
-        #begin
+        begin
           if str.strip.empty?
             result.lines << line unless line.empty?
             line = SRT::Line.new
@@ -38,12 +37,48 @@ module SRT
             end
 
           end
-        #rescue
-        #  line.error = "#{index}, General Error, [#{str}]"
-        #  puts line.error
-        #end
+        rescue
+          line.error = "#{index}, General Error, [#{str}]"
+          puts line.error
+        end
       end
       result
+    end
+
+    def split(instructions)
+      if instructions.length == 1 && instructions[:at]
+        split_points = [instructions[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
+        split_offsprings = [SRT::File.new]
+
+        loss_compensation = 0
+
+        lines.each_with_index do |line, index|
+          if split_points.empty? || line.end_time <= split_points.first
+            split_offsprings.last.lines << line.clone
+            split_offsprings.last.lines.last.start_time -= loss_compensation
+            split_offsprings.last.lines.last.end_time -= loss_compensation
+          elsif line.start_time < split_points.first
+            split_offsprings.last.lines << line.clone
+            split_offsprings.last.lines.last.start_time -= loss_compensation
+            split_offsprings.last.lines.last.end_time = split_points.first - loss_compensation
+            loss_compensation = split_points.first
+            split_points.delete_at(0)
+            split_offsprings << SRT::File.new
+            split_offsprings.last.lines << line.clone
+            split_offsprings.last.lines.last.start_time = 0
+            split_offsprings.last.lines.last.end_time -= loss_compensation                        
+          else
+            loss_compensation = split_points.first
+            split_points.delete_at(0)
+            split_offsprings << SRT::File.new
+            split_offsprings.last.lines << line.clone
+            split_offsprings.last.lines.last.start_time -= loss_compensation
+            split_offsprings.last.lines.last.end_time -= loss_compensation            
+          end
+        end
+      end
+
+      split_offsprings
     end
 
     def timeshift(instructions)

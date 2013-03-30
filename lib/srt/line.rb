@@ -17,6 +17,17 @@ module SRT
       end
     end
 
+    def clone
+      clone = Line.new
+      clone.display_coordinates = display_coordinates
+      clone.sequence = sequence
+      clone.start_time = start_time
+      clone.end_time = end_time
+      clone.error = error
+      clone.text = text.clone
+      clone
+    end
+
     def empty?
       sequence.nil? && start_time.nil? && end_time.nil? && text.empty?
     end
