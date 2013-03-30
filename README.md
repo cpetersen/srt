@@ -1,6 +1,7 @@
 # SRT [![Build Status](https://travis-ci.org/cpetersen/srt.png?branch=master)](https://travis-ci.org/cpetersen/srt)
 
-SRT stands for SubRip text file format, which is a file for storing subtitles. This is a Ruby library for manipulating SRT files. 
+SRT stands for SubRip text file format, which is a file for storing subtitles; This is a Ruby library for manipulating SRT files.  
+Current functionality includes `parsing`, constant, progressive and framerate-based `timeshifting` and `splitting`.
 
 ## Installation
 
@@ -64,7 +65,7 @@ were created for is using - you just need to find two matching reference points 
 **Framerate-based timeshift**
 
 ```ruby
-  file.timeshift({ "25fps" => "23.976fps" }) # Scale timecodes from 25fps to 23.976fps
+  file.timeshift( "25fps" => "23.976fps" ) # Scale timecodes from 25fps to 23.976fps
 ```
 
 For a framerate-based timeshift pass a hash of the form `"[old]fps" => "[new]fps"`
