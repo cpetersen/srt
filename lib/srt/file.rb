@@ -45,6 +45,22 @@ module SRT
       result
     end
 
+    def append(instructions)
+      if instructions.length == 1 && instructions.values[0].class == SRT::File
+        reshift = SRT::File.parse_timecode(instructions.keys[0]) || (lines.last.end_time + SRT::File.parse_timespan(instructions.keys[0]))
+        renumber = lines.last.sequence
+
+        instructions.values[0].lines.each do |line|
+          lines << line.clone
+          lines.last.sequence += renumber
+          lines.last.start_time += reshift
+          lines.last.end_time += reshift
+        end
+      end
+
+      self
+    end
+
     def split(instructions)
       if instructions.length == 1 && instructions[:at]
         split_points = [instructions[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort

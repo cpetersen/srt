@@ -128,6 +128,41 @@ describe SRT do
       end
     end
 
+    describe "#append" do
+      context "when calling it on the first (part1) of two seperate SRT files for Black Swan" do
+        let(:part1) { SRT::File.parse(File.open("./spec/blackswan-part1.srt")) }
+        let(:part2) { SRT::File.parse(File.open("./spec/blackswan-part2.srt")) }
+      
+        context "when passing { \"00:53:57,241\" => part2 }" do
+          before { part1.append({ "00:53:57,241" => part2 }) }
+
+          it "should have grown to 808 subtitles" do
+            expect(part1.lines.length).to eq(808)
+          end
+
+          it "should have appended subtitles starting with sequence number 448" do
+            expect(part1.lines[447].sequence).to eq(448)
+          end         
+
+          it "should have appended subtitles ending with sequence number 808" do
+            expect(part1.lines.last.sequence).to eq(808)
+          end
+
+          it "should have appended subtitles relatively from 00:53:57,241" do
+            expect(part1.lines[447].time_str).to eq("00:54:02,152 --> 00:54:04,204")
+          end          
+        end
+
+        context "when passing { \"+7.241s\" => part2 }" do
+          before { part1.append({ "+7.241s" => part2 }) }
+          
+          it "should have appended subtitles relatively from +7.241s after the previously last subtitle" do
+            expect(part1.lines[447].time_str).to eq("00:54:02,283 --> 00:54:04,335")
+          end
+        end
+      end
+    end
+
     describe "#split" do
       context "when calling it on a properly formatted BSG SRT file" do
         let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
