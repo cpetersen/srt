@@ -161,6 +161,38 @@ describe SRT do
             expect(result[1].lines[1].time_str).to eq("00:00:01,737 --> 00:00:03,466")
           end
         end
+      
+        context "when passing { :at => [\"00:15:00,000\", \"00:30:00,000\"] }" do 
+          let(:result) { file.split( :at => ["00:15:00,000", "00:30:00,000"] ) }
+
+          it "should return an array containing three SRT::File instances" do
+            expect(result.length).to eq(3)
+            expect(result[0].class).to eq(SRT::File)
+            expect(result[1].class).to eq(SRT::File)
+            expect(result[2].class).to eq(SRT::File)
+          end
+
+          it "should let subtitles start at sequence number #1 in all three files" do
+            expect(result[0].lines.first.sequence).to eq(1)
+            expect(result[1].lines.first.sequence).to eq(1)
+            expect(result[2].lines.first.sequence).to eq(1)
+          end
+
+          it "should put 176 subtitles in the first file" do
+            expect(result[0].lines.length).to eq(176)
+            expect(result[0].lines.last.sequence).to eq(176)
+          end
+
+          it "should put 213 subtitles in the second file" do
+            expect(result[1].lines.length).to eq(213)
+            expect(result[1].lines.last.sequence).to eq(213)
+          end
+
+          it "should put 212 subtitles in the third file" do
+            expect(result[2].lines.length).to eq(212)
+            expect(result[2].lines.last.sequence).to eq(212)
+          end         
+        end
       end
     end
 

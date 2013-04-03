@@ -50,30 +50,40 @@ module SRT
         split_points = [instructions[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
         split_offsprings = [SRT::File.new]
 
-        loss_compensation = 0
+        reshift = 0
+        renumber = 0
 
-        lines.each_with_index do |line, index|
+        lines.each do |line|
           if split_points.empty? || line.end_time <= split_points.first
             split_offsprings.last.lines << line.clone
-            split_offsprings.last.lines.last.start_time -= loss_compensation
-            split_offsprings.last.lines.last.end_time -= loss_compensation
+            split_offsprings.last.lines.last.sequence -= renumber
+            split_offsprings.last.lines.last.start_time -= reshift
+            split_offsprings.last.lines.last.end_time -= reshift
           elsif line.start_time < split_points.first
             split_offsprings.last.lines << line.clone
-            split_offsprings.last.lines.last.start_time -= loss_compensation
-            split_offsprings.last.lines.last.end_time = split_points.first - loss_compensation
-            loss_compensation = split_points.first
+            split_offsprings.last.lines.last.sequence -= renumber
+            split_offsprings.last.lines.last.start_time -= reshift
+            split_offsprings.last.lines.last.end_time = split_points.first - reshift
+
+            renumber = line.sequence - 1
+            reshift = split_points.first
             split_points.delete_at(0)
+
             split_offsprings << SRT::File.new
             split_offsprings.last.lines << line.clone
+            split_offsprings.last.lines.last.sequence -= renumber
             split_offsprings.last.lines.last.start_time = 0
-            split_offsprings.last.lines.last.end_time -= loss_compensation                        
+            split_offsprings.last.lines.last.end_time -= reshift                        
           else
-            loss_compensation = split_points.first
+            renumber = line.sequence - 1
+            reshift = split_points.first
             split_points.delete_at(0)
+
             split_offsprings << SRT::File.new
             split_offsprings.last.lines << line.clone
-            split_offsprings.last.lines.last.start_time -= loss_compensation
-            split_offsprings.last.lines.last.end_time -= loss_compensation            
+            split_offsprings.last.lines.last.sequence -= renumber
+            split_offsprings.last.lines.last.start_time -= reshift
+            split_offsprings.last.lines.last.end_time -= reshift            
           end
         end
       end
