@@ -1,7 +1,7 @@
 # SRT [![Build Status](https://travis-ci.org/cpetersen/srt.png?branch=master)](https://travis-ci.org/cpetersen/srt)
 
 SRT stands for SubRip text file format, which is a file for storing subtitles; This is a Ruby library for manipulating SRT files.  
-Current functionality includes `parsing`, constant, progressive and framerate-based `timeshifting` and `splitting`.
+Current functionality includes **parsing**, **appending**, **splitting** and **timeshifting** (constant, progressive and framerate-based).
 
 ## Installation
 
@@ -27,6 +27,39 @@ You can parse an SRT file with the following code:
     puts line.text.join(" ")
   end
 ```
+
+Each line exposes the following methods/members:
+* `sequence` The incrementing subtitle ID (starts at 1)
+* `text` An **Array** holding one or multiple lines of text.
+* `start_time` The subtitle start timecode in seconds as a float 
+* `end_time` The subtitle end timecode in seconds as a float
+* `time_str` Returns a timecode string of the form `"00:53:35,558 --> 00:53:36,556"`
+* `display_coordinates` Optional display coordinates of the form `"X1:100 X2:600 Y1:100 Y2:400"`
+
+#### Appending
+
+```ruby
+  part2 = SRT::File.parse(File.new("PART2_FILENAME.srt"))
+  file.append( "00:53:57,000" => part2 ) # Append subtitles from part2 starting at 00:53:57
+```
+
+The method `append` can be used to merge two subtitle files into one (e.g. two parts from a 2-cd video).
+Pass a hash with the key being either the *end timecode of the corresponding video of the subtitle being appended to*
+or the *timespan between the last subtitle and the end of that video* and the value being another `SRT::File`.
+The timecodes of the appended subtitles are shifted so they start at the right point in your merged video as well.
+
+Example options for the timespan variant: `{ "+3.56s" => part2 }`
+
+#### Splitting
+
+```ruby
+  parts = file.split( :at => "01:09:24,000" ) # Split the file in two at 01:09:24
+```
+
+The method `split` splits your subtitles at one (or more) points and returns an array of two (or more) instances of `SRT::File`.
+The timecodes of the split parts are relatively shifted towards the beginning so they line up with your multi-part video. (You probably expected that.)
+
+Example options for a multi-split: `{ :at => ["00:19:24,500", "01:32:09,120", ...] }`
 
 #### Timeshifting
 
@@ -71,17 +104,6 @@ were created for is using - you just need to find two matching reference points 
 For a framerate-based timeshift pass a hash of the form `"[old]fps" => "[new]fps"`
 
 This is usually only useful if you have some background information about the designated framerates of your video and subtitles.
-
-#### Splitting
-
-```ruby
-  parts = file.split( :at => "01:09:24,000" ) # Split the file in two at 01:09:24
-```
-
-The method `split` splits your subtitles at one (or more) points and returns an array of two (or more) instances of `SRT::File`.
-The timecodes of the split parts are relatively shifted towards the beginning so they line up with your multi-part video. (You probably expected that.)
-
-Example options for a multi-split: `{ :at => ["00:19:24,500", "01:32:09,120", ...] }`
 
 ## Contributing
 
