@@ -44,63 +44,61 @@ describe SRT do
       end
     end    
 
-    describe ".parse" do
+    shared_examples_for "an SRT file" do
       context "when parsing a properly formatted BSG SRT file" do
-        let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
-
         it "should return an SRT::File" do
-          expect(file.class).to eq(SRT::File)
+          expect(subject.class).to eq(SRT::File)
         end
         
         it "should have 600 lines" do
-          expect(file.lines.size).to eq(600)
+          expect(subject.lines.size).to eq(600)
+        end
+
+        it "should have no errors" do
+          expect(subject.errors).to be_empty
+        end
+
+        it "should have the expected sequence number on the first subtitle" do
+          expect(subject.lines.first.sequence).to eq(1)
+        end
+
+        it "should have the expected timecodes on the first subtitle" do
+          expect(subject.lines.first.time_str).to eq("00:00:02,110 --> 00:00:04,578")
+        end
+
+        it "should have the expected text on the first subtitle" do
+          expect(subject.lines.first.text).to eq(["<i>(male narrator) Previously", "on Battlestar Galactica.</i>"])
+        end
+
+        it "should have the expected sequence number on the last subtitle" do
+          expect(subject.lines.last.sequence).to eq(600)
+        end
+
+        it "should have the expected timecodes on the last subtitle" do
+          expect(subject.lines.last.time_str).to eq("00:43:26,808 --> 00:43:28,139")
+        end
+
+        it "should have the expected text on the last subtitle" do
+          expect(subject.lines.last.text).to eq(["Thank you."])
+        end
+      end
+    end
+
+    describe ".parse with uncommon formats" do
+      context "when parsing a spanish language WOTW SRT file with unknown encoding" do
+        let(:file) { SRT::File.parse(File.open("./spec/wotw-dubious.srt")) }
+
+        it "should parse" do
+          expect(file.class).to eq(SRT::File)
+        end
+
+        it "should have 1123 lines" do
+          expect(file.lines.size).to eq(1123)
         end
 
         it "should have no errors" do
           expect(file.errors).to be_empty
         end
-
-        it "should have the expected sequence number on the first subtitle" do
-          expect(file.lines.first.sequence).to eq(1)
-        end
-
-        it "should have the expected timecodes on the first subtitle" do
-          expect(file.lines.first.time_str).to eq("00:00:02,110 --> 00:00:04,578")
-        end
-
-        it "should have the expected text on the first subtitle" do
-          expect(file.lines.first.text).to eq(["<i>(male narrator) Previously", "on Battlestar Galactica.</i>"])
-        end
-
-        it "should have the expected sequence number on the last subtitle" do
-          expect(file.lines.last.sequence).to eq(600)
-        end
-
-        it "should have the expected timecodes on the last subtitle" do
-          expect(file.lines.last.time_str).to eq("00:43:26,808 --> 00:43:28,139")
-        end
-
-        it "should have the expected text on the last subtitle" do
-          expect(file.lines.last.text).to eq(["Thank you."])
-        end
-      end
-
-      context "when parsing a spanish language WOTW SRT file with unknown encoding" do
-        let(:file) { SRT::File.parse(File.open("./spec/wotw-dubious.srt")) }
-
-        # not sure actually
-
-        # it "should parse" do
-        #   expect(file.class).to eq(SRT::File)
-        # end
-
-        # it "should have 1123 lines" do
-        #   expect(file.lines.size).to eq(1123)
-        # end
-
-        # it "should have no errors" do
-        #   expect(file.errors).to be_empty
-        # end
       end      
 
       context "when parsing a dummy SRT file containing display coordinates" do
@@ -126,6 +124,16 @@ describe SRT do
           expect(file.lines.last.display_coordinates).to eq("X1:1 X2:333 Y1:50 Y2:29")
         end
       end
+    end
+
+    describe SRT::File, "when initialized with a valid BSG SRT string" do
+      subject { SRT::File.parse(File.read("./spec/bsg-s01e01.srt")) }
+      it_should_behave_like "an SRT file"
+    end
+
+    describe SRT::File, "when initialized with a valid BSG SRT File" do
+      subject { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+      it_should_behave_like "an SRT file"
     end
 
     describe "#append" do
