@@ -1,20 +1,34 @@
 module SRT
   class File
-    def self.parse(file)
+    def self.parse(input)
+      if input.is_a?(String)
+        parse_string(input)
+      elsif input.is_a?(::File)
+        parse_file(input)
+      else
+        raise "Invalid input. Expected a String or File, got #{input.class.name}."
+      end
+    end
+
+    def self.parse_file(srt_file)
+      parse_string ::File.open(srt_file, 'rb') { |f| srt_file.read }
+    end
+
+    def self.parse_string(srt_data)
       result = SRT::File.new
       line = SRT::Line.new
-      file.each_with_index do |str, index|
+      
+      split_srt_data(srt_data).each_with_index do |str, index|
         begin
           if str.strip.empty?
             result.lines << line unless line.empty?
             line = SRT::Line.new
           elsif !line.error
-
             if line.sequence.nil?
               line.sequence = str.to_i
             elsif line.start_time.nil?
               if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+) ?(?<display_coordinates>X1:\d+ X2:\d+ Y1:\d+ Y2:\d+)?/)
-                
+
                 if (line.start_time = SRT::File.parse_timecode(mres["start_timecode"])) == nil
                   line.error = "#{line}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
                   puts line.error
@@ -43,6 +57,21 @@ module SRT
         end
       end
       result
+    end
+
+    # Ruby often gets the wrong encoding for a file and will throw 
+    # errors on `split` for invalid byte sequences. This chain of 
+    # fallback encodings lets us get something that works.
+    def self.split_srt_data(srt_data)
+      begin
+        srt_data.split(/\n/) + ["\n"]
+      rescue
+        begin
+          srt_data.force_encoding('utf-8').split(/\n/) + ["\n"]
+        rescue
+          srt_data.force_encoding('iso-8859-1').split(/\n/) + ["\n"]
+        end
+      end
     end
 
     def append(instructions)
