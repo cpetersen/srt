@@ -74,12 +74,12 @@ module SRT
       end
     end
 
-    def append(instructions)
-      if instructions.length == 1 && instructions.values[0].class == SRT::File
-        reshift = SRT::File.parse_timecode(instructions.keys[0]) || (lines.last.end_time + SRT::File.parse_timespan(instructions.keys[0]))
+    def append(options)
+      if options.length == 1 && options.values[0].class == SRT::File
+        reshift = SRT::File.parse_timecode(options.keys[0]) || (lines.last.end_time + SRT::File.parse_timespan(options.keys[0]))
         renumber = lines.last.sequence
 
-        instructions.values[0].lines.each do |line|
+        options.values[0].lines.each do |line|
           lines << line.clone
           lines.last.sequence += renumber
           lines.last.start_time += reshift
@@ -90,9 +90,10 @@ module SRT
       self
     end
 
-    def split(instructions)
-      if instructions.length == 1 && instructions[:at]
-        split_points = [instructions[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
+    def split(options)
+      options = { shift_time: true }.merge(options)
+      if options[:at]
+        split_points = [options[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
         split_offsprings = [SRT::File.new]
 
         reshift = 0
@@ -100,35 +101,47 @@ module SRT
 
         lines.each do |line|
           if split_points.empty? || line.end_time <= split_points.first
-            split_offsprings.last.lines << line.clone
-            split_offsprings.last.lines.last.sequence -= renumber
-            split_offsprings.last.lines.last.start_time -= reshift
-            split_offsprings.last.lines.last.end_time -= reshift
+            cloned_line = line.clone
+            cloned_line.sequence -= renumber
+            if options[:shift_time]
+              cloned_line.start_time -= reshift
+              cloned_line.end_time -= reshift
+            end
+            split_offsprings.last.lines << cloned_line
           elsif line.start_time < split_points.first
-            split_offsprings.last.lines << line.clone
-            split_offsprings.last.lines.last.sequence -= renumber
-            split_offsprings.last.lines.last.start_time -= reshift
-            split_offsprings.last.lines.last.end_time = split_points.first - reshift
+            cloned_line = line.clone
+            cloned_line.sequence -= renumber
+            if options[:shift_time]
+              cloned_line.start_time -= reshift
+              cloned_line.end_time = split_points.first - reshift
+            end
+            split_offsprings.last.lines << cloned_line
 
             renumber = line.sequence - 1
             reshift = split_points.first
             split_points.delete_at(0)
 
             split_offsprings << SRT::File.new
-            split_offsprings.last.lines << line.clone
-            split_offsprings.last.lines.last.sequence -= renumber
-            split_offsprings.last.lines.last.start_time = 0
-            split_offsprings.last.lines.last.end_time -= reshift                        
+            cloned_line = line.clone
+            cloned_line.sequence -= renumber
+            if options[:shift_time]
+              cloned_line.start_time = 0
+              cloned_line.end_time -= reshift
+            end
+            split_offsprings.last.lines << cloned_line
           else
             renumber = line.sequence - 1
             reshift = split_points.first
             split_points.delete_at(0)
 
             split_offsprings << SRT::File.new
-            split_offsprings.last.lines << line.clone
-            split_offsprings.last.lines.last.sequence -= renumber
-            split_offsprings.last.lines.last.start_time -= reshift
-            split_offsprings.last.lines.last.end_time -= reshift            
+            cloned_line = line.clone
+            cloned_line.sequence -= renumber
+            if options[:shift_time]
+              cloned_line.start_time -= reshift
+              cloned_line.end_time -= reshift
+            end
+            split_offsprings.last.lines << cloned_line
           end
         end
       end
@@ -136,25 +149,25 @@ module SRT
       split_offsprings
     end
 
-    def timeshift(instructions)
-      if instructions.length == 1
-        if instructions[:all] && (seconds = SRT::File.parse_timespan(instructions[:all]))
+    def timeshift(options)
+      if options.length == 1
+        if options[:all] && (seconds = SRT::File.parse_timespan(options[:all]))
           lines.each do |line|
             line.start_time += seconds unless line.start_time + seconds < 0
             line.end_time += seconds unless line.end_time + seconds < 0
           end
-        elsif (original_framerate = SRT::File.parse_framerate(instructions.keys[0])) && (target_framerate = SRT::File.parse_framerate(instructions.values[0]))
+        elsif (original_framerate = SRT::File.parse_framerate(options.keys[0])) && (target_framerate = SRT::File.parse_framerate(options.values[0]))
           ratio = target_framerate / original_framerate
           lines.each do |line|
             line.start_time *= ratio
             line.end_time *= ratio
           end
         end
-      elsif instructions.length == 2
-        original_timecode_a = (instructions.keys[0].is_a?(String) ? SRT::File.parse_timecode(instructions.keys[0]) : lines[instructions.keys[0] - 1].start_time)
-        original_timecode_b = (instructions.keys[1].is_a?(String) ? SRT::File.parse_timecode(instructions.keys[1]) : lines[instructions.keys[1] - 1].start_time)
-        target_timecode_a = SRT::File.parse_timecode(instructions.values[0]) || (original_timecode_a + SRT::File.parse_timespan(instructions.values[0]))
-        target_timecode_b = SRT::File.parse_timecode(instructions.values[1]) || (original_timecode_b + SRT::File.parse_timespan(instructions.values[1]))
+      elsif options.length == 2
+        original_timecode_a = (options.keys[0].is_a?(String) ? SRT::File.parse_timecode(options.keys[0]) : lines[options.keys[0] - 1].start_time)
+        original_timecode_b = (options.keys[1].is_a?(String) ? SRT::File.parse_timecode(options.keys[1]) : lines[options.keys[1] - 1].start_time)
+        target_timecode_a = SRT::File.parse_timecode(options.values[0]) || (original_timecode_a + SRT::File.parse_timespan(options.values[0]))
+        target_timecode_b = SRT::File.parse_timecode(options.values[1]) || (original_timecode_b + SRT::File.parse_timespan(options.values[1]))
 
         time_rescale_factor = (target_timecode_b - target_timecode_a) / (original_timecode_b - original_timecode_a)
         time_rebase_shift = target_timecode_a - original_timecode_a * time_rescale_factor
