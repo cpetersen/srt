@@ -140,8 +140,8 @@ module SRT
       if instructions.length == 1
         if instructions[:all] && (seconds = SRT::File.parse_timespan(instructions[:all]))
           lines.each do |line|
-            line.start_time += seconds unless line.start_time + seconds < 0
-            line.end_time += seconds unless line.end_time + seconds < 0
+            line.start_time += seconds
+            line.end_time += seconds
           end
         elsif (original_framerate = SRT::File.parse_framerate(instructions.keys[0])) && (target_framerate = SRT::File.parse_framerate(instructions.values[0]))
           ratio = target_framerate / original_framerate
@@ -164,10 +164,18 @@ module SRT
           line.end_time = line.end_time * time_rescale_factor + time_rebase_shift
         end
       end
+
+      if lines.reject! { |line| line.end_time < 0 }
+        lines.sort_by! { |line| line.sequence }
+        lines.each_with_index do |line, index|
+         line.sequence = index + 1
+         line.start_time = 0 if line.start_time < 0
+        end
+      end
     end
 
     def to_s
-      lines.map{ |l| [l.sequence, (l.display_coordinates ? l.time_str + l.display_coordinates : l.time_str), l.text, ""] }.flatten.join("\n")
+      lines.map { |l| [l.sequence, (l.display_coordinates ? l.time_str + l.display_coordinates : l.time_str), l.text, ""] }.flatten.join("\n")
     end
 
     attr_writer :lines

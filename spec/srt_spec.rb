@@ -99,7 +99,7 @@ describe SRT do
         it "should have no errors" do
           expect(file.errors).to be_empty
         end
-      end      
+      end
 
       context "when parsing a dummy SRT file containing display coordinates" do
         let(:file) { SRT::File.parse(File.open("./spec/coordinates-dummy.srt")) }
@@ -267,15 +267,35 @@ describe SRT do
           end
         end
 
-        context "when passing { 24 => \"00:03:53,582\", 43 => \"00:14:54,656\" }" do
-          before { file.timeshift({ 24 => "00:03:53,582", 43 => "00:14:54,656" }) }
+        context "when passing { 24 => \"00:03:53,582\", 42 => \"00:04:24,656\" }" do
+          before { file.timeshift({ 24 => "00:03:53,582", 42 => "00:04:24,656" }) }
 
           it "should have shifted timecodes for subtitle #24" do
-            expect(file.lines[23].time_str).to eq("00:03:53,582 --> 00:04:03,009")
+            expect(file.lines[23].time_str).to eq("00:03:53,582 --> 00:03:54,042")
           end
           
           it "should have differently shifted timecodes for subtitle #43" do
-            expect(file.lines[42].time_str).to eq("00:14:54,656 --> 00:15:03,730")
+            expect(file.lines[41].time_str).to eq("00:04:24,656 --> 00:04:25,298")
+          end
+        end
+      end
+
+      context "when calling it on a spanish language WOTW SRT file with unknown encoding" do
+        let(:file) { SRT::File.parse(File.open("./spec/wotw-dubious.srt")) }
+
+        context "when passing { :all => \"-2.7m\" }" do
+          before { file.timeshift({ :all => "-2.7m" }) }
+
+          it "should have dumped 16 lines with now negative timecodes, leaving 1107" do
+            expect(file.lines.size).to eq(1107)
+          end
+        end
+
+        context "when passing { \"00:03:25,430\" => \"00:00:44,200\", \"01:49:29,980\" => \"01:46:35,600\" }" do
+          before { file.timeshift({ "00:03:25,430" => "00:00:44,200", "01:49:29,980" => "01:46:35,600" }) }
+
+          it "should have dumped 16 lines with now negative timecodes, leaving 1107" do
+            expect(file.lines.size).to eq(1107)
           end
         end
       end
