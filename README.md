@@ -57,7 +57,8 @@ Example options for the timespan variant: `{ "+3.56s" => part2 }`
 ```
 
 The method `split` splits your subtitles at one (or more) points and returns an array of two (or more) instances of `SRT::File`.
-The timecodes of the split parts are relatively shifted towards the beginning so they line up with your multi-part video. (You probably expected that.)
+By default, the timecodes of the split parts are relatively shifted towards their beginnings (to line up with correspondingly split multi-part video);
+By additionally passing `:timeshift => false` you can prevent that behaviour and retain the original timecodes for each split part.
 
 Example options for a multi-split: `{ :at => ["00:19:24,500", "01:32:09,120", ...] }`
 
