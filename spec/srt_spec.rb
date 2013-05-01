@@ -26,6 +26,13 @@ describe SRT do
   end
 
   describe SRT::File do
+
+    describe ".parse_id" do
+      it "should convert the id string (#[id]) to an int representing the sequence number" do
+        SRT::File.parse_id("#317").should eq(317)
+      end
+    end
+
     describe ".parse_timecode" do
       it "should convert the SRT timecode format to a float representing seconds" do
         SRT::File.parse_timecode("01:03:44,200").should eq(3824.2)
@@ -35,6 +42,10 @@ describe SRT do
     describe ".parse_timespan" do
       it "should convert a timespan string ([+|-][amount][h|m|s|mil]) to a float representing seconds" do
         SRT::File.parse_timespan("-3.5m").should eq(-210)
+      end
+
+      it "should convert a timespan string ([+|-][amount][h|m|s|mil]) to a float representing seconds" do
+        SRT::File.parse_timespan("-1s").should eq(-1)
       end
     end
 
@@ -297,8 +308,8 @@ describe SRT do
           end
         end
 
-        context "when passing { 24 => \"00:03:53,582\", 42 => \"00:04:24,656\" }" do
-          before { file.timeshift({ 24 => "00:03:53,582", 42 => "00:04:24,656" }) }
+        context "when passing { \"#24\" => \"00:03:53,582\", \"#42\" => \"00:04:24,656\" }" do
+          before { file.timeshift({ "#24" => "00:03:53,582", "#42" => "00:04:24,656" }) }
 
           it "should have shifted timecodes for subtitle #24" do
             file.lines[23].time_str.should eq("00:03:53,582 --> 00:03:54,042")
@@ -308,6 +319,18 @@ describe SRT do
             file.lines[41].time_str.should eq("00:04:24,656 --> 00:04:25,298")
           end
         end
+
+        context "when passing { 180 => \"+1s\", 264 => \"+1.5s\" }" do
+          before { file.timeshift({ 180 => "+1s", 264 => "+1.5s" }) }
+
+          it "should have shifted by +1s at 180 seconds" do
+            file.lines[23].time_str.should eq("00:01:57,415 --> 00:01:58,948")
+          end
+          
+          it "should have shifted by +1.5s at 264 seconds" do
+            file.lines[41].time_str.should eq("00:03:40,997 --> 00:03:43,136")
+          end
+        end        
       end
 
       context "when calling it on a spanish language WOTW SRT file with unknown encoding" do

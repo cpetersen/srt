@@ -164,13 +164,24 @@ module SRT
           end
         end
       elsif options.length == 2
-        original_timecode_a = (options.keys[0].is_a?(String) ? SRT::File.parse_timecode(options.keys[0]) : lines[options.keys[0] - 1].start_time)
-        original_timecode_b = (options.keys[1].is_a?(String) ? SRT::File.parse_timecode(options.keys[1]) : lines[options.keys[1] - 1].start_time)
-        target_timecode_a = SRT::File.parse_timecode(options.values[0]) || (original_timecode_a + SRT::File.parse_timespan(options.values[0]))
-        target_timecode_b = SRT::File.parse_timecode(options.values[1]) || (original_timecode_b + SRT::File.parse_timespan(options.values[1]))
+        origins, targets = options.keys, options.values
 
-        time_rescale_factor = (target_timecode_b - target_timecode_a) / (original_timecode_b - original_timecode_a)
-        time_rebase_shift = target_timecode_a - original_timecode_a * time_rescale_factor
+        [0,1].each do |i|
+          if origins[i].is_a?(String) && SRT::File.parse_id(origins[i])
+            origins[i] = lines[SRT::File.parse_id(origins[i]) - 1].start_time
+          elsif origins[i].is_a?(String) && SRT::File.parse_timecode(origins[i])
+            origins[i] = SRT::File.parse_timecode(origins[i])
+          end
+
+          if targets[i].is_a?(String) && SRT::File.parse_timecode(targets[i])
+            targets[i] = SRT::File.parse_timecode(targets[i])
+          elsif targets[i].is_a?(String) && SRT::File.parse_timespan(targets[i])
+            targets[i] = origins[i] + SRT::File.parse_timespan(targets[i])
+          end
+        end
+
+        time_rescale_factor = (targets[1] - targets[0]) / (origins[1] - origins[0])
+        time_rebase_shift = targets[0] - origins[0] * time_rescale_factor
 
         lines.each do |line|
           line.start_time = line.start_time * time_rescale_factor + time_rebase_shift
@@ -208,6 +219,11 @@ module SRT
       mres ? mres["fps"].to_f : nil
     end
 
+    def self.parse_id(id_string)
+      mres = id_string.match(/#(?<id>\d+)/)
+      mres ? mres["id"].to_i : nil
+    end
+
     def self.parse_timecode(timecode_string)
       mres = timecode_string.match(/(?<h>\d+):(?<m>\d+):(?<s>\d+),(?<mil>\d+)/)
       mres ? "#{mres["h"].to_i * 3600 + mres["m"].to_i * 60 + mres["s"].to_i}.#{mres["mil"]}".to_f : nil
@@ -218,10 +234,10 @@ module SRT
         "mil" => 0.001,
         "s" => 1,
         "m" => 60,
-        "h" => 3600 
+        "h" => 3600
       }
 
-      mres = timespan_string.match(/(?<amount>(\+|-)?\d+((\.)?\d+))(?<unit>mil|s|m|h)/)
+      mres = timespan_string.match(/(?<amount>(\+|-)?\d+((\.)?\d+)?)(?<unit>mil|s|m|h)/)
       mres ? mres["amount"].to_f * factors[mres["unit"]] : nil
     end
   end
