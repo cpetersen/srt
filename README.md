@@ -78,19 +78,24 @@ Other example options, e.g.: `:all => "+700mil"`, `:all => "1.34m"`, `:all => "0
  **Progressive timeshift**
 
 ```ruby
-  file.timeshift({ 1 => "00:02:12,000", 843 => "01:38:06,000" }) # Correct drifting-out-of-sync
+  file.timeshift({ "#1" => "00:02:12,000", "#843" => "01:38:06,000" }) # Correct drifting-out-of-sync
 ```
 
 This example call would shift the **first subtitle** to `00:02:12`, the **last subtitle** (assuming here that `#843` is the last one in your file) to `01:38:06`, and all the ones before, after, and in between those two reference points seamlessly to their own resulting earlier or later begin times.
 
-To make this work pass two `original timecode/id => target timecode` pairs where each takes any of these 4 forms: 
+To make this work pass two `origin timecode => target timecode` pairs, where the *origin timecodes* can be supplied as:
 
-* `[id] => "[hh]:[mm]:[ss],[mil]"`
-* `[id] => "[+/-][amount][h|m|s|mil]"`
-* `"[hh]:[mm]:[ss],[mil]" => "[hh]:[mm]:[ss],[mil]"`
-* `"[hh]:[mm]:[ss],[mil]" => "[+/-][amount][h|m|s|mil]"`
+* `float` providing the raw timecode in *seconds*, e.g.:  `195.65`
+* `"[hh]:[mm]:[ss],[mil]"` string, which is a timecode in SRT notation, e.g.: `"00:02:12,000"`
+* `"#[id]"` string, which references the timecode of the subtitle with the supplied id, e.g.:  `"#317"`
 
-Another full example: `{ "00:00:51,400" => "+13s", "01:12:44,320" => "+2.436m" }`
+... and the *target timecodes* can be supplied as:
+
+* `float` providing the raw timecode in *seconds*, e.g.:  `3211.3`
+* `"[hh]:[mm]:[ss],[mil]"` string, which is a timecode in SRT notation, e.g.: `"01:01:03,300"`
+* `"[+/-][amount][h|m|s|mil]"` string, describing the amount by which to shift the origin timecode, e.g.: `"+1.5s"`
+
+So for example: `{ "00:00:51,400" => "+13s", "01:12:44,320" => "+2.436m" }`
 
 This method can be used to fix subtitles that are *at different times differently out of sync*,
 and comes in handy especially if you have no idea what framerate your video or the video for which your subtitles
