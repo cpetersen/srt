@@ -17,7 +17,7 @@ module SRT
     def self.parse_string(srt_data)
       result = SRT::File.new
       line = SRT::Line.new
-      
+
       split_srt_data(srt_data).each_with_index do |str, index|
         begin
           if str.strip.empty?
@@ -31,12 +31,12 @@ module SRT
 
                 if (line.start_time = SRT::File.parse_timecode(mres["start_timecode"])) == nil
                   line.error = "#{line}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
-                  puts line.error
+                  $stderr.puts line.error
                 end
 
                 if (line.end_time = SRT::File.parse_timecode(mres["end_timecode"])) == nil
                   line.error = "#{line}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
-                  puts line.error
+                  $stderr.puts line.error
                 end
 
                 if mres["display_coordinates"]
@@ -44,7 +44,7 @@ module SRT
                 end
               else
                 line.error = "#{line}, Invalid Time Line formatting, [#{str}]"
-                puts line.error
+                $stderr.puts line.error
               end
             else
               line.text << str.strip
@@ -53,14 +53,14 @@ module SRT
           end
         rescue
           line.error = "#{index}, General Error, [#{str}]"
-          puts line.error
+          $stderr.puts line.error
         end
       end
       result
     end
 
-    # Ruby often gets the wrong encoding for a file and will throw 
-    # errors on `split` for invalid byte sequences. This chain of 
+    # Ruby often gets the wrong encoding for a file and will throw
+    # errors on `split` for invalid byte sequences. This chain of
     # fallback encodings lets us get something that works.
     def self.split_srt_data(srt_data)
       begin
@@ -230,7 +230,7 @@ module SRT
     end
 
     def self.parse_timespan(timespan_string)
-      factors = { 
+      factors = {
         "mil" => 0.001,
         "s" => 1,
         "m" => 60,
