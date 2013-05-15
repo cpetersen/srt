@@ -1,6 +1,6 @@
 # SRT [![Build Status](https://travis-ci.org/cpetersen/srt.png?branch=master)](https://travis-ci.org/cpetersen/srt)
 
-SRT stands for SubRip text file format, which is a file for storing subtitles; This is a Ruby library for manipulating SRT files.  
+SRT stands for SubRip text file format, which is a file for storing subtitles; This is a Ruby library for manipulating SRT files.
 Current functionality includes **parsing**, **appending**, **splitting** and **timeshifting** (constant, progressive and framerate-based).
 
 ## Installation
@@ -12,7 +12,7 @@ Add this line to your application's Gemfile:
 And then execute:
 
     $ bundle
-    
+
 Or install it yourself as:
 
     $ gem install srt
@@ -31,7 +31,7 @@ You can parse an SRT file with the following code:
 Each line exposes the following methods/members:
 * `sequence` The incrementing subtitle ID (starts at 1)
 * `text` An **Array** holding one or multiple lines of text.
-* `start_time` The subtitle start timecode in seconds as a float 
+* `start_time` The subtitle start timecode in seconds as a float
 * `end_time` The subtitle end timecode in seconds as a float
 * `time_str` Returns a timecode string of the form `"00:53:35,558 --> 00:53:36,556"`
 * `display_coordinates` Optional display coordinates of the form `"X1:100 X2:600 Y1:100 Y2:400"`
@@ -66,14 +66,14 @@ Example options for a multi-split: `{ :at => ["00:19:24,500", "01:32:09,120", ..
 
 The method `timeshift` takes a hash and supports three different modes of timecode processing:
 
-**Constant timeshift** 
+**Constant timeshift**
 
 ```ruby
-  file.timeshift( :all => "-2.5s" ) # Shift all subtitles so they show up 2.5 seconds earlier    
+  file.timeshift( :all => "-2.5s" ) # Shift all subtitles so they show up 2.5 seconds earlier
 ```
 
-Simply pass a hash of the form `:all => "[+|-][amount][h|m|s|mil]"`  
-Other example options, e.g.: `:all => "+700mil"`, `:all => "1.34m"`, `:all => "0.15h"`
+Simply pass a hash of the form `:all => "[+|-][amount][h|m|s|mil|ms]"`
+Other example options, e.g.: `:all => "+700mil"`, `:all => "1.34m"`, `:all => "0.15h"`, `:all => "90ms"`
 
  **Progressive timeshift**
 
