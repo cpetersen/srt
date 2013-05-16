@@ -232,12 +232,12 @@ module SRT
     def self.parse_timespan(timespan_string)
       factors = {
         "mil" => 0.001,
+        "ms" => 0.001,
         "s" => 1,
         "m" => 60,
         "h" => 3600
       }
-
-      mres = timespan_string.match(/(?<amount>(\+|-)?\d+((\.)?\d+)?)(?<unit>mil|s|m|h)/)
+      mres = timespan_string.match(/(?<amount>(\+|-)?\d+((\.)?\d+)?)(?<unit>mil|ms|s|m|h)/)
       mres ? mres["amount"].to_f * factors[mres["unit"]] : nil
     end
   end
