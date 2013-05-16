@@ -72,8 +72,8 @@ The method `timeshift` takes a hash and supports three different modes of timeco
   file.timeshift( :all => "-2.5s" ) # Shift all subtitles so they show up 2.5 seconds earlier
 ```
 
-Simply pass a hash of the form `:all => "[+|-][amount][h|m|s|mil|ms]"`
-Other example options, e.g.: `:all => "+700mil"`, `:all => "1.34m"`, `:all => "0.15h"`, `:all => "90ms"`
+Simply pass a hash of the form `:all => "[+|-][amount][h|m|s|ms]"`
+Other example options, e.g.: `:all => "+1.34m"`, `:all => "0.15h"`, `:all => "90ms"`
 
  **Progressive timeshift**
 
@@ -86,14 +86,14 @@ This example call would shift the **first subtitle** to `00:02:12`, the **last s
 To make this work pass two `origin timecode => target timecode` pairs, where the *origin timecodes* can be supplied as:
 
 * `float` providing the raw timecode in *seconds*, e.g.:  `195.65`
-* `"[hh]:[mm]:[ss],[mil]"` string, which is a timecode in SRT notation, e.g.: `"00:02:12,000"`
+* `"[hh]:[mm]:[ss],[ms]"` string, which is a timecode in SRT notation, e.g.: `"00:02:12,000"`
 * `"#[id]"` string, which references the timecode of the subtitle with the supplied id, e.g.:  `"#317"`
 
 ... and the *target timecodes* can be supplied as:
 
 * `float` providing the raw timecode in *seconds*, e.g.:  `3211.3`
-* `"[hh]:[mm]:[ss],[mil]"` string, which is a timecode in SRT notation, e.g.: `"01:01:03,300"`
-* `"[+/-][amount][h|m|s|mil]"` string, describing the amount by which to shift the origin timecode, e.g.: `"+1.5s"`
+* `"[hh]:[mm]:[ss],[ms]"` string, which is a timecode in SRT notation, e.g.: `"01:01:03,300"`
+* `"[+/-][amount][h|m|s|ms]"` string, describing the amount by which to shift the origin timecode, e.g.: `"+1.5s"`
 
 So for example: `{ "00:00:51,400" => "+13s", "01:12:44,320" => "+2.436m" }`
 

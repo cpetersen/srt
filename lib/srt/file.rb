@@ -225,19 +225,18 @@ module SRT
     end
 
     def self.parse_timecode(timecode_string)
-      mres = timecode_string.match(/(?<h>\d+):(?<m>\d+):(?<s>\d+),(?<mil>\d+)/)
-      mres ? "#{mres["h"].to_i * 3600 + mres["m"].to_i * 60 + mres["s"].to_i}.#{mres["mil"]}".to_f : nil
+      mres = timecode_string.match(/(?<h>\d+):(?<m>\d+):(?<s>\d+),(?<ms>\d+)/)
+      mres ? "#{mres["h"].to_i * 3600 + mres["m"].to_i * 60 + mres["s"].to_i}.#{mres["ms"]}".to_f : nil
     end
 
     def self.parse_timespan(timespan_string)
       factors = {
-        "mil" => 0.001,
         "ms" => 0.001,
         "s" => 1,
         "m" => 60,
         "h" => 3600
       }
-      mres = timespan_string.match(/(?<amount>(\+|-)?\d+((\.)?\d+)?)(?<unit>mil|ms|s|m|h)/)
+      mres = timespan_string.match(/(?<amount>(\+|-)?\d+((\.)?\d+)?)(?<unit>ms|s|m|h)/)
       mres ? mres["amount"].to_f * factors[mres["unit"]] : nil
     end
   end

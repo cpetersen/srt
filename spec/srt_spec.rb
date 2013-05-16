@@ -40,13 +40,17 @@ describe SRT do
     end
 
     describe ".parse_timespan" do
-      it "should convert a timespan string ([+|-][amount][h|m|s|mil]) to a float representing seconds" do
+      it "should convert a timespan string ([+|-][amount][h|m|s|ms]) to a float representing seconds" do
         SRT::File.parse_timespan("-3.5m").should eq(-210)
       end
 
-      it "should convert a timespan string ([+|-][amount][h|m|s|mil]) to a float representing seconds" do
+      it "should convert a timespan string ([+|-][amount][h|m|s|ms]) to a float representing seconds" do
         SRT::File.parse_timespan("-1s").should eq(-1)
       end
+
+      it "should convert a timespan string ([+|-][amount][h|m|s|ms]) to a float representing seconds" do
+        SRT::File.parse_timespan("100ms").should eq(0.1)
+      end      
     end
 
     describe ".parse_framerate" do
