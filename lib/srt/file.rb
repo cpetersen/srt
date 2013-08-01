@@ -30,12 +30,12 @@ module SRT
               if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+) ?(?<display_coordinates>X1:\d+ X2:\d+ Y1:\d+ Y2:\d+)?/)
 
                 if (line.start_time = SRT::File.parse_timecode(mres["start_timecode"])) == nil
-                  line.error = "#{line}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
+                  line.error = "#{index}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
                   $stderr.puts line.error
                 end
 
                 if (line.end_time = SRT::File.parse_timecode(mres["end_timecode"])) == nil
-                  line.error = "#{line}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
+                  line.error = "#{index}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
                   $stderr.puts line.error
                 end
 
@@ -43,7 +43,7 @@ module SRT
                   line.display_coordinates = mres["display_coordinates"]
                 end
               else
-                line.error = "#{line}, Invalid Time Line formatting, [#{str}]"
+                line.error = "#{index}, Invalid Time Line formatting, [#{str}]"
                 $stderr.puts line.error
               end
             else
