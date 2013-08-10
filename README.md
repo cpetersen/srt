@@ -1,4 +1,4 @@
-# SRT [![Build Status](https://travis-ci.org/cpetersen/srt.png?branch=master)](https://travis-ci.org/cpetersen/srt)
+# SRT [![Build Status](https://travis-ci.org/cpetersen/srt.png?branch=master)](https://travis-ci.org/cpetersen/srt) [![Code Climate](https://codeclimate.com/github/cpetersen/srt.png)](https://codeclimate.com/github/cpetersen/srt) [![Coverage Status](https://coveralls.io/repos/cpetersen/srt/badge.png)](https://coveralls.io/r/cpetersen/srt)
 
 SRT stands for SubRip text file format, which is a file for storing subtitles; This is a Ruby library for manipulating SRT files.
 Current functionality includes **parsing**, **appending**, **splitting** and **timeshifting** (constant, progressive and framerate-based).
