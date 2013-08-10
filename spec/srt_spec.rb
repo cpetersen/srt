@@ -1,4 +1,5 @@
 require 'srt'
+require 'spec_helper'
 
 describe SRT do
 
