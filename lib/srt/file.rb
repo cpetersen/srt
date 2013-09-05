@@ -199,7 +199,6 @@ module SRT
     end
 
     def to_s(time_str_function=:time_str)
-
       lines.map { |l| [l.sequence, (l.display_coordinates ? l.send(time_str_function) + l.display_coordinates : l.send(time_str_function)), l.text, ""] }.flatten.join("\n")
     end
 
