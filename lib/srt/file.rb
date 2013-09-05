@@ -198,8 +198,18 @@ module SRT
       end
     end
 
-    def to_s
-      lines.map { |l| [l.sequence, (l.display_coordinates ? l.time_str + l.display_coordinates : l.time_str), l.text, ""] }.flatten.join("\n")
+    def to_s(time_str_function=:time_str)
+
+      lines.map { |l| [l.sequence, (l.display_coordinates ? l.send(time_str_function) + l.display_coordinates : l.send(time_str_function)), l.text, ""] }.flatten.join("\n")
+    end
+
+    def to_webvtt
+      header = <<-eos.strip_heredoc
+        WEBVTT
+        X-TIMESTAMP-MAP=MPEGTS:0,LOCAL:00:00:00.000
+
+      eos
+      header + to_s(:webvtt_time_str)
     end
 
     attr_writer :lines
