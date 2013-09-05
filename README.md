@@ -1,4 +1,4 @@
-# SRT [![Build Status](https://travis-ci.org/cpetersen/srt.png?branch=master)](https://travis-ci.org/cpetersen/srt) [![Code Climate](https://codeclimate.com/github/cpetersen/srt.png)](https://codeclimate.com/github/cpetersen/srt) 
+# SRT [![Build Status](https://travis-ci.org/cpetersen/srt.png?branch=master)](https://travis-ci.org/cpetersen/srt) [![Code Climate](https://codeclimate.com/github/cpetersen/srt.png)](https://codeclimate.com/github/cpetersen/srt)
 
 SRT stands for SubRip text file format, which is a file for storing subtitles; This is a Ruby library for manipulating SRT files.
 Current functionality includes **parsing**, **appending**, **splitting** and **timeshifting** (constant, progressive and framerate-based).
@@ -59,6 +59,7 @@ Example options for the timespan variant: `{ "+3.56s" => part2 }`
 The method `split` splits your subtitles at one (or more) points and returns an array of two (or more) instances of `SRT::File`.
 By default, the timecodes of the split parts are relatively shifted towards their beginnings (to line up with correspondingly split multi-part video);
 By additionally passing `:timeshift => false` you can prevent that behaviour and retain the original timecodes for each split part.
+
 Pass  the option `:renumber => false` to prevent the line sequence number from being reset for a segment.
 
 ```ruby
@@ -66,6 +67,14 @@ Pass  the option `:renumber => false` to prevent the line sequence number from b
 ```
 
 Example options for a multi-split: `{ :at => ["00:19:24,500", "01:32:09,120", ...] }`
+
+
+Optionally, for multi-splitting, you can pass a ":every" option to split the subtitles at a fixed interval.
+
+```ruby
+  parts = file.split( :every => "00:01:00,000" ) # Split the file every 1 minute
+```
+Note that the options :at and :every are mutually exclusive, and :at takes precedence.
 
 #### Timeshifting
 

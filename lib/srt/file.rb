@@ -92,8 +92,18 @@ module SRT
 
     def split(options)
       options = { :timeshift => true, :renumber => true }.merge(options)
-      if options[:at]
+
+      split_points = []
+
+      if (options[:at].present?)
         split_points = [options[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
+      elsif (options[:every].present?)
+        interval = SRT::File.parse_timecode(options[:every])
+        max = lines.last.end_time
+        (interval..max).step(interval){ |t| split_points << t }
+      end
+
+      if (split_points.present?)
         split_offsprings = [SRT::File.new]
 
         reshift = 0
