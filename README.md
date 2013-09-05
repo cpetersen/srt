@@ -59,6 +59,11 @@ Example options for the timespan variant: `{ "+3.56s" => part2 }`
 The method `split` splits your subtitles at one (or more) points and returns an array of two (or more) instances of `SRT::File`.
 By default, the timecodes of the split parts are relatively shifted towards their beginnings (to line up with correspondingly split multi-part video);
 By additionally passing `:timeshift => false` you can prevent that behaviour and retain the original timecodes for each split part.
+Pass  the option `:renumber => false` to prevent the line sequence number from being reset for a segment.
+
+```ruby
+  parts = file.split( :at => "01:09:24,000", :renumber => false ) # Split the file in two at 01:09:24 but do not reset the sequence number on the second part
+```
 
 Example options for a multi-split: `{ :at => ["00:19:24,500", "01:32:09,120", ...] }`
 
