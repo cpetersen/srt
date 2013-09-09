@@ -282,6 +282,71 @@ describe SRT do
             result[2].lines.last.sequence.should eq(212)
           end         
         end
+
+        context "when passing { :at => \"00:19:24,500\", :every => \"00:00:01,000\" }" do
+          let(:result) { file.split( :at => "00:19:24,500", :every => "00:00:01,000" ) }
+
+          it "should return an array containing two SRT::File instances, ignoring :every" do
+            result.length.should eq(2)
+            result[0].class.should eq(SRT::File)
+            result[1].class.should eq(SRT::File)
+          end
+        end
+
+        context "when passing { :every => \"00:05:00,000\" }" do
+          let(:result) { file.split( :every => "00:05:00,000" ) }
+
+          it "should return an array containing nine SRT::File instances" do
+            result.length.should eq(9)
+            (0...result.count).each do |n|
+              result[n].class.should eq(SRT::File)
+            end
+          end
+        end
+
+        context "when passing { :at => \"00:19:24,500\", :renumber => false }" do
+          let(:result) { file.split( :at => "00:19:24,500", :renumber => false ) }
+
+          it "sequence for the last line of first part should be the sequence for the first line of second part" do
+            result[0].lines.last.text.should == result[1].lines.first.text
+            result[0].lines.last.sequence.should == result[1].lines.first.sequence
+          end
+        end
+
+        context "when passing { :at => \"00:19:24,500\", :renumber => true }" do
+          let(:result) { file.split( :at => "00:19:24,500", :renumber => true ) }
+
+          it "first line of second part's number should be one" do
+            result[1].lines.first.sequence.should == 1
+          end
+
+          it "sequence for the last line of first part should have different number than the sequence for the first line of second part" do
+            result[0].lines.last.text.should == result[1].lines.first.text
+            result[0].lines.last.sequence.should_not == result[1].lines.first.sequence
+          end
+        end
+
+        context "when passing { :at => \"00:19:24,500\", :timeshift => false }" do
+          let(:result) { file.split( :at => "00:19:24,500", :timeshift => false ) }
+
+          it "time for last line of first part should be the time for first line of second part" do
+            result[0].lines.last.text.should == result[1].lines.first.text
+            result[0].lines.last.time_str.should == result[1].lines.first.time_str
+          end
+        end
+
+        context "when passing { :at => \"00:19:24,500\", :timeshift => true }" do
+          let(:result) { file.split( :at => "00:19:24,500", :timeshift => true ) }
+
+          it "start_time of first line in second part should be 0" do
+            result[1].lines.first.start_time.should == 0
+          end
+
+          it "time for last line of first part should not be the time for first line of second part" do
+            result[0].lines.last.text.should == result[1].lines.first.text
+            result[0].lines.last.time_str.should_not == result[1].lines.first.time_str
+          end
+        end
       end
     end
 
@@ -384,6 +449,37 @@ END
           end
         end
       end
+
+      describe "#to_webvtt" do
+        context "when calling it on a short SRT file" do
+          let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+
+          before { file.lines = file.lines[0..2] }
+
+          it "should produce the exactly correct output" do
+            OUTPUT_WEBVTT =<<END
+WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:0,LOCAL:00:00:00.000
+
+1
+00:00:02.110 --> 00:00:04.578
+<i>(male narrator) Previously
+on Battlestar Galactica.</i>
+
+2
+00:00:05.313 --> 00:00:06.871
+Now you're telling me
+you're a machine.
+
+3
+00:00:07.014 --> 00:00:08.003
+The robot.
+END
+            file.to_webvtt.should eq(OUTPUT_WEBVTT)
+          end
+        end
+      end
+
     end
   end
 end

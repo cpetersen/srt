@@ -91,9 +91,19 @@ module SRT
     end
 
     def split(options)
-      options = { :timeshift => true }.merge(options)
-      if options[:at]
+      options = { :timeshift => true, :renumber => true }.merge(options)
+
+      split_points = []
+
+      if (options[:at])
         split_points = [options[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
+      elsif (options[:every])
+        interval = SRT::File.parse_timecode(options[:every])
+        max = lines.last.end_time
+        (interval..max).step(interval){ |t| split_points << t }
+      end
+
+      if (split_points.count > 0)
         split_offsprings = [SRT::File.new]
 
         reshift = 0
@@ -102,7 +112,7 @@ module SRT
         lines.each do |line|
           if split_points.empty? || line.end_time <= split_points.first
             cloned_line = line.clone
-            cloned_line.sequence -= renumber
+            cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
               cloned_line.start_time -= reshift
               cloned_line.end_time -= reshift
@@ -110,7 +120,7 @@ module SRT
             split_offsprings.last.lines << cloned_line
           elsif line.start_time < split_points.first
             cloned_line = line.clone
-            cloned_line.sequence -= renumber
+            cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
               cloned_line.start_time -= reshift
               cloned_line.end_time = split_points.first - reshift
@@ -123,7 +133,7 @@ module SRT
 
             split_offsprings << SRT::File.new
             cloned_line = line.clone
-            cloned_line.sequence -= renumber
+            cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
               cloned_line.start_time = 0
               cloned_line.end_time -= reshift
@@ -136,7 +146,7 @@ module SRT
 
             split_offsprings << SRT::File.new
             cloned_line = line.clone
-            cloned_line.sequence -= renumber
+            cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
               cloned_line.start_time -= reshift
               cloned_line.end_time -= reshift
@@ -198,8 +208,17 @@ module SRT
       end
     end
 
-    def to_s
-      lines.map { |l| [l.sequence, (l.display_coordinates ? l.time_str + l.display_coordinates : l.time_str), l.text, ""] }.flatten.join("\n")
+    def to_s(time_str_function=:time_str)
+      lines.map { |l| [l.sequence, (l.display_coordinates ? l.send(time_str_function) + l.display_coordinates : l.send(time_str_function)), l.text, ""] }.flatten.join("\n")
+    end
+
+    def to_webvtt
+      header = <<eos
+WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:0,LOCAL:00:00:00.000
+
+eos
+      header + to_s(:webvtt_time_str)
     end
 
     attr_writer :lines
