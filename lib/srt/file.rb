@@ -95,15 +95,15 @@ module SRT
 
       split_points = []
 
-      if (options[:at].present?)
+      if (options[:at])
         split_points = [options[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
-      elsif (options[:every].present?)
+      elsif (options[:every])
         interval = SRT::File.parse_timecode(options[:every])
         max = lines.last.end_time
         (interval..max).step(interval){ |t| split_points << t }
       end
 
-      if (split_points.present?)
+      if (split_points.count > 0)
         split_offsprings = [SRT::File.new]
 
         reshift = 0
@@ -213,11 +213,11 @@ module SRT
     end
 
     def to_webvtt
-      header = <<-eos.strip_heredoc
-        WEBVTT
-        X-TIMESTAMP-MAP=MPEGTS:0,LOCAL:00:00:00.000
+      header = <<eos
+WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:0,LOCAL:00:00:00.000
 
-      eos
+eos
       header + to_s(:webvtt_time_str)
     end
 
