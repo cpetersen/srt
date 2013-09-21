@@ -27,6 +27,20 @@ describe SRT do
   end
 
   describe SRT::File do
+    describe '#parse' do
+      context "parsing with debug true" do
+        it "should be verbose when failing" do
+          $stderr.should_receive(:puts).once
+          SRT::File.parse(File.open("./spec/invalid.srt"), debug: true).errors.should_not be_empty
+        end
+      end
+      context "parsing with debug false" do
+        it "should raise exception silently" do
+          $stderr.should_not_receive(:puts)
+          SRT::File.parse(File.open("./spec/invalid.srt")).errors.should_not be_empty
+        end
+      end
+    end
 
     describe ".parse_id" do
       it "should convert the id string (#[id]) to an int representing the sequence number" do

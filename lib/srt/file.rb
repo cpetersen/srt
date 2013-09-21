@@ -1,6 +1,7 @@
 module SRT
   class File
-    def self.parse(input)
+    def self.parse(input, options = {})
+      @debug = options.fetch(:debug, false)
       if input.is_a?(String)
         parse_string(input)
       elsif input.is_a?(::File)
@@ -31,12 +32,12 @@ module SRT
 
                 if (line.start_time = SRT::File.parse_timecode(mres["start_timecode"])) == nil
                   line.error = "#{index}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
-                  $stderr.puts line.error
+                  $stderr.puts line.error if @debug
                 end
 
                 if (line.end_time = SRT::File.parse_timecode(mres["end_timecode"])) == nil
                   line.error = "#{index}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
-                  $stderr.puts line.error
+                  $stderr.puts line.error if @debug
                 end
 
                 if mres["display_coordinates"]
@@ -44,7 +45,7 @@ module SRT
                 end
               else
                 line.error = "#{index}, Invalid Time Line formatting, [#{str}]"
-                $stderr.puts line.error
+                $stderr.puts line.error if @debug
               end
             else
               line.text << str.strip
@@ -53,7 +54,7 @@ module SRT
           end
         rescue
           line.error = "#{index}, General Error, [#{str}]"
-          $stderr.puts line.error
+          $stderr.puts line.error if @debug
         end
       end
       result
