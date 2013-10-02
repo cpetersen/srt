@@ -1,8 +1,7 @@
-require 'srt'
 require 'spec_helper'
+require 'srt'
 
 describe SRT do
-
   describe SRT::Line do
     describe "#new" do
       let(:line) { SRT::Line.new }
