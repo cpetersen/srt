@@ -7,6 +7,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Ruby gem for parsing srt (subtitle) files. SRT stands for SubRip text file format, which is a file for storing subtitles.}
   gem.summary       = %q{Ruby gem for parsing subtitle files.}
   gem.homepage      = "https://github.com/cpetersen/srt"
+  gem.license       = 'MIT'
 
   gem.add_development_dependency('rake')
   gem.add_development_dependency('rspec')
