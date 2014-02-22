@@ -16,7 +16,7 @@ module SRT
     end
 
     def self.parse_string(srt_data)
-      result = SRT::File.new
+      result = new
       line = SRT::Line.new
 
       split_srt_data(srt_data).each_with_index do |str, index|
@@ -30,12 +30,12 @@ module SRT
             elsif line.start_time.nil?
               if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+) ?(?<display_coordinates>X1:\d+ X2:\d+ Y1:\d+ Y2:\d+)?/)
 
-                if (line.start_time = SRT::File.parse_timecode(mres["start_timecode"])) == nil
+                if (line.start_time = self.parse_timecode(mres["start_timecode"])) == nil
                   line.error = "#{index}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
                   $stderr.puts line.error if @debug
                 end
 
-                if (line.end_time = SRT::File.parse_timecode(mres["end_timecode"])) == nil
+                if (line.end_time = self.parse_timecode(mres["end_timecode"])) == nil
                   line.error = "#{index}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
                   $stderr.puts line.error if @debug
                 end
@@ -76,8 +76,8 @@ module SRT
     end
 
     def append(options)
-      if options.length == 1 && options.values[0].class == SRT::File
-        reshift = SRT::File.parse_timecode(options.keys[0]) || (lines.last.end_time + SRT::File.parse_timespan(options.keys[0]))
+      if options.length == 1 && options.values[0].class == self.class
+        reshift = self.class.parse_timecode(options.keys[0]) || (lines.last.end_time + self.class.parse_timespan(options.keys[0]))
         renumber = lines.last.sequence
 
         options.values[0].lines.each do |line|
@@ -97,9 +97,9 @@ module SRT
       split_points = []
 
       if (options[:at])
-        split_points = [options[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
+        split_points = [options[:at]].flatten.map{ |timecode| self.class.parse_timecode(timecode) }.sort
       elsif (options[:every])
-        interval = SRT::File.parse_timecode(options[:every])
+        interval = self.class.parse_timecode(options[:every])
         max = lines.last.end_time
         (interval..max).step(interval){ |t| split_points << t }
       end
@@ -162,12 +162,12 @@ module SRT
 
     def timeshift(options)
       if options.length == 1
-        if options[:all] && (seconds = SRT::File.parse_timespan(options[:all]))
+        if options[:all] && (seconds = self.class.parse_timespan(options[:all]))
           lines.each do |line|
             line.start_time += seconds
             line.end_time += seconds
           end
-        elsif (original_framerate = SRT::File.parse_framerate(options.keys[0])) && (target_framerate = SRT::File.parse_framerate(options.values[0]))
+        elsif (original_framerate = self.class.parse_framerate(options.keys[0])) && (target_framerate = self.class.parse_framerate(options.values[0]))
           ratio = target_framerate / original_framerate
           lines.each do |line|
             line.start_time *= ratio
@@ -178,16 +178,16 @@ module SRT
         origins, targets = options.keys, options.values
 
         [0,1].each do |i|
-          if origins[i].is_a?(String) && SRT::File.parse_id(origins[i])
-            origins[i] = lines[SRT::File.parse_id(origins[i]) - 1].start_time
-          elsif origins[i].is_a?(String) && SRT::File.parse_timecode(origins[i])
-            origins[i] = SRT::File.parse_timecode(origins[i])
+          if origins[i].is_a?(String) && self.class.parse_id(origins[i])
+            origins[i] = lines[self.class.parse_id(origins[i]) - 1].start_time
+          elsif origins[i].is_a?(String) && self.class.parse_timecode(origins[i])
+            origins[i] = self.class.parse_timecode(origins[i])
           end
 
-          if targets[i].is_a?(String) && SRT::File.parse_timecode(targets[i])
-            targets[i] = SRT::File.parse_timecode(targets[i])
-          elsif targets[i].is_a?(String) && SRT::File.parse_timespan(targets[i])
-            targets[i] = origins[i] + SRT::File.parse_timespan(targets[i])
+          if targets[i].is_a?(String) && self.class.parse_timecode(targets[i])
+            targets[i] = self.class.parse_timecode(targets[i])
+          elsif targets[i].is_a?(String) && self.class.parse_timespan(targets[i])
+            targets[i] = origins[i] + self.class.parse_timespan(targets[i])
           end
         end
 
