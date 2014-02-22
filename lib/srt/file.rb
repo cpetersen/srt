@@ -17,13 +17,13 @@ module SRT
 
     def self.parse_string(srt_data)
       result = new
-      line = SRT::Line.new
+      line = Line.new
 
       split_srt_data(srt_data).each_with_index do |str, index|
         begin
           if str.strip.empty?
             result.lines << line unless line.empty?
-            line = SRT::Line.new
+            line = Line.new
           elsif !line.error
             if line.sequence.nil?
               line.sequence = str.to_i
@@ -105,7 +105,7 @@ module SRT
       end
 
       if (split_points.count > 0)
-        split_offsprings = [SRT::File.new]
+        split_offsprings = [File.new]
 
         reshift = 0
         renumber = 0
@@ -132,7 +132,7 @@ module SRT
             reshift = split_points.first
             split_points.delete_at(0)
 
-            split_offsprings << SRT::File.new
+            split_offsprings << File.new
             cloned_line = line.clone
             cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
@@ -145,7 +145,7 @@ module SRT
             reshift = split_points.first
             split_points.delete_at(0)
 
-            split_offsprings << SRT::File.new
+            split_offsprings << File.new
             cloned_line = line.clone
             cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
