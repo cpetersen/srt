@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'srt'
 
 describe SRT::Parser do
