@@ -50,7 +50,6 @@ module SRT
             else
               line.text << str.strip
             end
-
           end
         rescue
           line.error = "#{index}, General Error, [#{str}]"
