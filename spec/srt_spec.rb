@@ -29,13 +29,13 @@ describe SRT do
       context "parsing with debug true" do
         it "should be verbose when failing" do
           $stderr.should_receive(:puts).once
-          SRT::File.parse(File.open("./spec/invalid.srt"), debug: true).errors.should_not be_empty
+          SRT::File.parse(File.open("./spec/fixtures/invalid.srt"), debug: true).errors.should_not be_empty
         end
       end
       context "parsing with debug false" do
         it "should raise exception silently" do
           $stderr.should_not_receive(:puts)
-          SRT::File.parse(File.open("./spec/invalid.srt")).errors.should_not be_empty
+          SRT::File.parse(File.open("./spec/fixtures/invalid.srt")).errors.should_not be_empty
         end
       end
     end
@@ -82,7 +82,7 @@ describe SRT do
 
     describe ".parse with uncommon formats" do
       context "when parsing a spanish language WOTW SRT file with unknown encoding" do
-        let(:file) { SRT::File.parse(File.open("./spec/wotw-dubious.srt")) }
+        let(:file) { SRT::File.parse(File.open("./spec/fixtures/wotw-dubious.srt")) }
 
         it "should parse" do
           file.class.should eq(SRT::File)
@@ -98,7 +98,7 @@ describe SRT do
       end
 
       context "when parsing a dummy SRT file containing display coordinates" do
-        let(:file) { SRT::File.parse(File.open("./spec/coordinates-dummy.srt")) }
+        let(:file) { SRT::File.parse(File.open("./spec/fixtures/coordinates-dummy.srt")) }
 
         it "should return an SRT::File" do
           file.class.should eq(SRT::File)
@@ -123,19 +123,19 @@ describe SRT do
     end
 
     describe SRT::File, "when initialized with a valid BSG SRT string" do
-      subject { SRT::File.parse(File.read("./spec/bsg-s01e01.srt")) }
+      subject { SRT::File.parse(File.read("./spec/fixtures/bsg-s01e01.srt")) }
       it_should_behave_like "an SRT file"
     end
 
     describe SRT::File, "when initialized with a valid BSG SRT File" do
-      subject { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+      subject { SRT::File.parse(File.open("./spec/fixtures/bsg-s01e01.srt")) }
       it_should_behave_like "an SRT file"
     end
 
     describe "#append" do
       context "when calling it on the first (part1) of two seperate SRT files for Black Swan" do
-        let(:part1) { SRT::File.parse(File.open("./spec/blackswan-part1.srt")) }
-        let(:part2) { SRT::File.parse(File.open("./spec/blackswan-part2.srt")) }
+        let(:part1) { SRT::File.parse(File.open("./spec/fixtures/blackswan-part1.srt")) }
+        let(:part2) { SRT::File.parse(File.open("./spec/fixtures/blackswan-part2.srt")) }
 
         context "when passing { \"00:53:57,241\" => part2 }" do
           before { part1.append({ "00:53:57,241" => part2 }) }
@@ -169,7 +169,7 @@ describe SRT do
 
     describe "#split" do
       context "when calling it on a properly formatted BSG SRT file" do
-        let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+        let(:file) { SRT::File.parse(File.open("./spec/fixtures/bsg-s01e01.srt")) }
 
         context "when passing { :at => \"00:19:24,500\" }" do
           let(:result) { file.split( :at => "00:19:24,500" ) }
@@ -332,7 +332,7 @@ describe SRT do
 
     describe "#timeshift" do
       context "when calling it on a properly formatted BSG SRT file" do
-        let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+        let(:file) { SRT::File.parse(File.open("./spec/fixtures/bsg-s01e01.srt")) }
 
         context "when passing { :all => \"+2.5s\" }" do
           before { file.timeshift({ :all => "+2.5s" }) }
@@ -384,7 +384,7 @@ describe SRT do
       end
 
       context "when calling it on a spanish language WOTW SRT file with unknown encoding" do
-        let(:file) { SRT::File.parse(File.open("./spec/wotw-dubious.srt")) }
+        let(:file) { SRT::File.parse(File.open("./spec/fixtures/wotw-dubious.srt")) }
 
         context "when passing { :all => \"-2.7m\" }" do
           before { file.timeshift({ :all => "-2.7m" }) }
@@ -405,7 +405,7 @@ describe SRT do
 
       describe "#to_s" do
         context "when calling it on a short SRT file" do
-          let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+          let(:file) { SRT::File.parse(File.open("./spec/fixtures/bsg-s01e01.srt")) }
 
           before { file.lines = file.lines[0..2] }
 
@@ -432,7 +432,7 @@ END
 
       describe "#to_webvtt" do
         context "when calling it on a short SRT file" do
-          let(:file) { SRT::File.parse(File.open("./spec/bsg-s01e01.srt")) }
+          let(:file) { SRT::File.parse(File.open("./spec/fixtures/bsg-s01e01.srt")) }
 
           before { file.lines = file.lines[0..2] }
 
