@@ -16,26 +16,26 @@ module SRT
     end
 
     def self.parse_string(srt_data)
-      result = SRT::File.new
-      line = SRT::Line.new
+      result = new
+      line = Line.new
 
       split_srt_data(srt_data).each_with_index do |str, index|
         begin
           if str.strip.empty?
             result.lines << line unless line.empty?
-            line = SRT::Line.new
+            line = Line.new
           elsif !line.error
             if line.sequence.nil?
               line.sequence = str.to_i
             elsif line.start_time.nil?
               if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+) ?(?<display_coordinates>X1:\d+ X2:\d+ Y1:\d+ Y2:\d+)?/)
 
-                if (line.start_time = SRT::File.parse_timecode(mres["start_timecode"])) == nil
+                if (line.start_time = Parser.timecode(mres["start_timecode"])) == nil
                   line.error = "#{index}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
                   $stderr.puts line.error if @debug
                 end
 
-                if (line.end_time = SRT::File.parse_timecode(mres["end_timecode"])) == nil
+                if (line.end_time = Parser.timecode(mres["end_timecode"])) == nil
                   line.error = "#{index}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
                   $stderr.puts line.error if @debug
                 end
@@ -50,7 +50,6 @@ module SRT
             else
               line.text << str.strip
             end
-
           end
         rescue
           line.error = "#{index}, General Error, [#{str}]"
@@ -76,8 +75,8 @@ module SRT
     end
 
     def append(options)
-      if options.length == 1 && options.values[0].class == SRT::File
-        reshift = SRT::File.parse_timecode(options.keys[0]) || (lines.last.end_time + SRT::File.parse_timespan(options.keys[0]))
+      if options.length == 1 && options.values[0].class == self.class
+        reshift = Parser.timecode(options.keys[0]) || (lines.last.end_time + Parser.timespan(options.keys[0]))
         renumber = lines.last.sequence
 
         options.values[0].lines.each do |line|
@@ -97,15 +96,15 @@ module SRT
       split_points = []
 
       if (options[:at])
-        split_points = [options[:at]].flatten.map{ |timecode| SRT::File.parse_timecode(timecode) }.sort
+        split_points = [options[:at]].flatten.map{ |timecode| Parser.timecode(timecode) }.sort
       elsif (options[:every])
-        interval = SRT::File.parse_timecode(options[:every])
+        interval = Parser.timecode(options[:every])
         max = lines.last.end_time
         (interval..max).step(interval){ |t| split_points << t }
       end
 
       if (split_points.count > 0)
-        split_offsprings = [SRT::File.new]
+        split_offsprings = [File.new]
 
         reshift = 0
         renumber = 0
@@ -132,7 +131,7 @@ module SRT
             reshift = split_points.first
             split_points.delete_at(0)
 
-            split_offsprings << SRT::File.new
+            split_offsprings << File.new
             cloned_line = line.clone
             cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
@@ -145,7 +144,7 @@ module SRT
             reshift = split_points.first
             split_points.delete_at(0)
 
-            split_offsprings << SRT::File.new
+            split_offsprings << File.new
             cloned_line = line.clone
             cloned_line.sequence -= renumber if options[:renumber]
             if options[:timeshift]
@@ -162,12 +161,12 @@ module SRT
 
     def timeshift(options)
       if options.length == 1
-        if options[:all] && (seconds = SRT::File.parse_timespan(options[:all]))
+        if options[:all] && (seconds = Parser.timespan(options[:all]))
           lines.each do |line|
             line.start_time += seconds
             line.end_time += seconds
           end
-        elsif (original_framerate = SRT::File.parse_framerate(options.keys[0])) && (target_framerate = SRT::File.parse_framerate(options.values[0]))
+        elsif (original_framerate = Parser.framerate(options.keys[0])) && (target_framerate = Parser.framerate(options.values[0]))
           ratio = target_framerate / original_framerate
           lines.each do |line|
             line.start_time *= ratio
@@ -178,16 +177,16 @@ module SRT
         origins, targets = options.keys, options.values
 
         [0,1].each do |i|
-          if origins[i].is_a?(String) && SRT::File.parse_id(origins[i])
-            origins[i] = lines[SRT::File.parse_id(origins[i]) - 1].start_time
-          elsif origins[i].is_a?(String) && SRT::File.parse_timecode(origins[i])
-            origins[i] = SRT::File.parse_timecode(origins[i])
+          if origins[i].is_a?(String) && Parser.id(origins[i])
+            origins[i] = lines[Parser.id(origins[i]) - 1].start_time
+          elsif origins[i].is_a?(String) && Parser.timecode(origins[i])
+            origins[i] = Parser.timecode(origins[i])
           end
 
-          if targets[i].is_a?(String) && SRT::File.parse_timecode(targets[i])
-            targets[i] = SRT::File.parse_timecode(targets[i])
-          elsif targets[i].is_a?(String) && SRT::File.parse_timespan(targets[i])
-            targets[i] = origins[i] + SRT::File.parse_timespan(targets[i])
+          if targets[i].is_a?(String) && Parser.timecode(targets[i])
+            targets[i] = Parser.timecode(targets[i])
+          elsif targets[i].is_a?(String) && Parser.timespan(targets[i])
+            targets[i] = origins[i] + Parser.timespan(targets[i])
           end
         end
 
@@ -230,34 +229,6 @@ eos
 
     def errors
       lines.collect { |l| l.error if l.error }.compact
-    end
-
-    protected
-
-    def self.parse_framerate(framerate_string)
-      mres = framerate_string.match(/(?<fps>\d+((\.)?\d+))(fps)/)
-      mres ? mres["fps"].to_f : nil
-    end
-
-    def self.parse_id(id_string)
-      mres = id_string.match(/#(?<id>\d+)/)
-      mres ? mres["id"].to_i : nil
-    end
-
-    def self.parse_timecode(timecode_string)
-      mres = timecode_string.match(/(?<h>\d+):(?<m>\d+):(?<s>\d+),(?<ms>\d+)/)
-      mres ? "#{mres["h"].to_i * 3600 + mres["m"].to_i * 60 + mres["s"].to_i}.#{mres["ms"]}".to_f : nil
-    end
-
-    def self.parse_timespan(timespan_string)
-      factors = {
-        "ms" => 0.001,
-        "s" => 1,
-        "m" => 60,
-        "h" => 3600
-      }
-      mres = timespan_string.match(/(?<amount>(\+|-)?\d+((\.)?\d+)?)(?<unit>ms|s|m|h)/)
-      mres ? mres["amount"].to_f * factors[mres["unit"]] : nil
     end
   end
 end
