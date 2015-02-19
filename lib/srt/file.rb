@@ -215,7 +215,7 @@ module SRT
     def to_webvtt
       header = <<eos
 WEBVTT
-X-TIMESTAMP-MAP=MPEGTS:0,LOCAL:00:00:00.000
+X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000
 
 eos
       header + to_s(:webvtt_time_str)
