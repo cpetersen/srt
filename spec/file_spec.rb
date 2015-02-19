@@ -416,7 +416,7 @@ END
         it "should produce the exactly correct output" do
           OUTPUT_WEBVTT =<<END
 WEBVTT
-X-TIMESTAMP-MAP=MPEGTS:0,LOCAL:00:00:00.000
+X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000
 
 1
 00:00:02.110 --> 00:00:04.578
