@@ -67,6 +67,7 @@ module SRT
         srt_data.split(/\n/) + ["\n"]
       rescue
         begin
+          srt_data = srt_data.unpack("C*").pack("U*")
           srt_data.force_encoding('utf-8').split(/\n/) + ["\n"]
         rescue
           srt_data.force_encoding('iso-8859-1').split(/\n/) + ["\n"]
