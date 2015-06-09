@@ -72,6 +72,11 @@ describe SRT::File do
       it "should have no errors" do
         expect(file.errors).to be_empty
       end
+
+      it "should convert some dubious UTF-8 encodings" do
+        first_line = file.lines.first.text.join(" ")
+        expect(first_line).to eq("<i>Nadie habría creído en los primeros años del siglo 21...</i>")
+      end
     end
 
     context "when parsing a dummy SRT file containing display coordinates" do
