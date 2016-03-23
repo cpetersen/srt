@@ -168,10 +168,10 @@ module SRT
             line.end_time += seconds
           end
         elsif (original_framerate = Parser.framerate(options.keys[0])) && (target_framerate = Parser.framerate(options.values[0]))
-          ratio = target_framerate / original_framerate
+          time_ratio = original_framerate / target_framerate
           lines.each do |line|
-            line.start_time *= ratio
-            line.end_time *= ratio
+            line.start_time *= time_ratio
+            line.end_time *= time_ratio
           end
         end
       elsif options.length == 2

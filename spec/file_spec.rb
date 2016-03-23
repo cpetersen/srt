@@ -333,11 +333,11 @@ describe SRT::File do
         before { file.timeshift({ "25fps" => "23.976fps" }) }
 
         it "should have correctly scaled timecodes for subtitle #24" do
-          expect(file.lines[23].time_str).to eq("00:01:52,007 --> 00:01:53,469")
+          expect(file.lines[23].time_str).to eq("00:02:01,779 --> 00:02:03,368")
         end
 
         it "should have correctly scaled timecodes for subtitle #43" do
-          expect(file.lines[42].time_str).to eq("00:03:34,503 --> 00:03:35,910")
+          expect(file.lines[42].time_str).to eq("00:03:53,217 --> 00:03:54,746")
         end
       end
 
