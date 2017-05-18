@@ -16,7 +16,6 @@ describe SRT::Parser do
     end
 
     it "should handle timecodes with no milliseconds component" do
-      expect(subject.timecode("01:03:44")).not_to be_nil
       expect(subject.timecode("01:03:44")).to eq(3824.0)
     end
   end
