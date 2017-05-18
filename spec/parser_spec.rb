@@ -14,6 +14,11 @@ describe SRT::Parser do
     it "should convert the SRT timecode format to a float representing seconds" do
       expect(subject.timecode("01:03:44,200")).to eq(3824.2)
     end
+
+    it "should handle timecodes with no milliseconds component" do
+      expect(subject.timecode("01:03:44")).not_to be_nil
+      expect(subject.timecode("01:03:44")).to eq(3824.0)
+    end
   end
 
   describe ".timespan" do
