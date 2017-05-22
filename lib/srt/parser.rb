@@ -12,7 +12,7 @@ module SRT
       end
 
       def timecode(timecode_string)
-        mres = timecode_string.match(/(?<h>\d+):(?<m>\d+):(?<s>\d+)[,.](?<ms>\d+)/)
+        mres = timecode_string.match(/(?<h>\d+):(?<m>\d+):(?<s>\d+)[,.]?(?<ms>\d+)?/)
         mres ? "#{mres["h"].to_i * 3600 + mres["m"].to_i * 60 + mres["s"].to_i}.#{mres["ms"]}".to_f : nil
       end
 
