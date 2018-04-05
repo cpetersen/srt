@@ -22,4 +22,20 @@ describe SRT::Line do
       expect(line.time_str).to eq("00:03:44,200 --> 00:04:04,578")
     end
   end
+
+  describe "#to_s" do
+    let(:line) { SRT::Line.new }
+
+    before do
+      line.sequence = "1"
+      line.start_time = 224.2
+      line.end_time = 244.578
+    end
+    
+    context "with empty content" do
+      it "creates a valid empty node" do
+        expect(line.to_s).to eq("1\n00:03:44,200 --> 00:04:04,578\n\n")
+      end
+    end
+  end
 end
