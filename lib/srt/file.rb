@@ -18,6 +18,8 @@ module SRT
     def self.parse_string(srt_data)
       result = new
       line = Line.new
+      last_line = Line.new
+      count = 0
 
       split_srt_data(srt_data).each_with_index do |str, index|
         begin
@@ -26,16 +28,23 @@ module SRT
             line = Line.new
           elsif !line.error
             if line.sequence.nil?
+              count += 1
               line.sequence = str.to_i
+              unless count == line.sequence
+                line.error = "#{index}, Invalid formatting of sequence index, [#{line.sequence}]"
+                $stderr.puts line.error if @debug
+              end
             elsif line.start_time.nil?
               if mres = str.match(/(?<start_timecode>[^[[:space:]]]+) -+> (?<end_timecode>[^[[:space:]]]+) ?(?<display_coordinates>X1:\d+ X2:\d+ Y1:\d+ Y2:\d+)?/)
+                line.start_time = Parser.timecode(mres["start_timecode"])
+                line.end_time = Parser.timecode(mres["end_timecode"])
 
-                if (line.start_time = Parser.timecode(mres["start_timecode"])) == nil
+                if line.start_time.nil? || !last_line.empty? && last_line.end_time > line.start_time
                   line.error = "#{index}, Invalid formatting of start timecode, [#{mres["start_timecode"]}]"
                   $stderr.puts line.error if @debug
                 end
 
-                if (line.end_time = Parser.timecode(mres["end_timecode"])) == nil
+                if line.end_time.nil? || line.start_time > line.end_time
                   line.error = "#{index}, Invalid formatting of end timecode, [#{mres["end_timecode"]}]"
                   $stderr.puts line.error if @debug
                 end
@@ -43,6 +52,8 @@ module SRT
                 if mres["display_coordinates"]
                   line.display_coordinates = mres["display_coordinates"]
                 end
+
+                last_line = line
               else
                 line.error = "#{index}, Invalid Time Line formatting, [#{str}]"
                 $stderr.puts line.error if @debug
