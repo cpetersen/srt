@@ -33,7 +33,7 @@ module SRT
     end
 
     def time_str(subframe_separator=",")
-      [@start_time, @end_time].map { |t| sprintf("%02d:%02d:%02d#{subframe_separator}%s", t / 3600, (t % 3600) / 60, t % 60, sprintf("%.3f", t)[-3, 3]) }.join(" --> ")
+      [@start_time, @end_time].map { |t|  f=sprintf("%.3f", t); ip=f[0,f.size-4].to_i;fp=f[-3,3]; "%02d:%02d:%02d#{subframe_separator}%s" % [ip / 3600, (ip % 3600) / 60, ip % 60,fp] }.join(" --> ")
     end
 
     def webvtt_time_str
