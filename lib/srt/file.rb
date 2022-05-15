@@ -209,6 +209,20 @@ module SRT
       end
     end
 
+    def has_sequence_error?
+      sequence = lines.map { |line| line.sequence }
+      sequence_error_after = nil
+
+      sequence.each_cons(2) { |x,y|
+        if y - x != 1
+          sequence_error_after = x
+          break
+        end
+      }
+
+      "Sequence error after #{sequence_error_after}" if sequence_error_after
+    end
+
     def to_s(time_str_function=:time_str)
       lines.map { |l| l.to_s(time_str_function) }.join("\n")
     end
