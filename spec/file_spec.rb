@@ -313,6 +313,35 @@ describe SRT::File do
     end
   end
 
+  describe "has_sequence_error?" do
+    context "when sequence is ok" do
+      let(:file1) { SRT::File.parse(File.open("./spec/fixtures/blackswan-part1.srt")) }
+      let(:file2) { SRT::File.parse(File.open("./spec/fixtures/bsg-s01e01.srt")) }
+      let(:file3) { SRT::File.parse(File.open("./spec/fixtures/blackswan-part2.srt")) }
+      it "should return nil" do
+        expect(file1.has_sequence_error?).to eq nil
+        expect(file2.has_sequence_error?).to eq nil
+        expect(file3.has_sequence_error?).to eq nil
+      end
+    end
+
+    context "when sequence is non-consecutive" do
+      let(:file) { SRT::File.parse(File.open("./spec/fixtures/broken_sequence.srt")) }
+
+      it "should return a useful error message about the sequence" do
+        expect(file.has_sequence_error?).to eq("Sequence error after 1")
+      end
+    end
+
+    context "when there are unexpected blank lines" do
+      let(:file) { SRT::File.parse(File.open("./spec/fixtures/unexpected_blanks.srt")) }
+
+      it "should return a useful error message about the sequence" do
+        expect(file.has_sequence_error?).to eq("Sequence error after 3")
+      end
+    end
+  end
+
   describe "#timeshift" do
     context "when calling it on a properly formatted BSG SRT file" do
       let(:file) { SRT::File.parse(File.open("./spec/fixtures/bsg-s01e01.srt")) }
